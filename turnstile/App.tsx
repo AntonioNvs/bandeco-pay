@@ -1,64 +1,130 @@
-import { StatusBar } from 'expo-status-bar';
-import React, {useEffect, useState} from 'react';
-import { StyleSheet, Text, View, Alert, Button  } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import NfcManager, { NfcTech } from 'react-native-nfc-manager';
 
+NfcManager.start();
 
-import {initNfc, readNdef} from './nfc';
-import NfcManager, { NfcTech, TagEvent } from 'react-native-nfc-manager';
+const App = () => {
+  const [nfcTag, setNfcTag] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isNfcActive, setIsNfcActive] = useState(false);
 
-export default function App() {
-  const [nfcTag, setNfcTag] = useState<TagEvent | null>(null);
+  // Função para iniciar a leitura NFC
+  const startNfcReading = async () => {
+    try {
+      await NfcManager.cancelTechnologyRequest().catch(() => {});
+
+      await NfcManager.requestTechnology(NfcTech.Ndef);
+      const tag = await NfcManager.getTag();
+      setNfcTag(tag);
+      setLoading(false); // Finaliza o loading
+      setIsNfcActive(true);
+
+      // Aguarda 5 segundos e volta para a tela de leitura
+      setTimeout(() => {
+        setNfcTag(null); // Reseta os dados da tag
+        setLoading(true); // Volta para o estado de loading
+        startNfcReading();
+      }, 6000); // 5 segundos
+
+    } catch (ex) {
+      console.warn(ex);
+    } finally {
+      if (isNfcActive) {
+        NfcManager.cancelTechnologyRequest();
+        setIsNfcActive(false);
+      }
+    }
+  };
 
   useEffect(() => {
-    initNfc().then(() => {});
+    // Ativa a leitura de NFC automaticamente ao carregar a tela
+    startNfcReading();
+
+    // Limpa o listener de NFC ao desmontar o componente
+    return () => {
+      NfcManager.setEventListener(NfcTech.Ndef, null);
+    };
   }, []);
 
-  // const handleReadNfc = async () => {
-  //   try {
-  //     const tag = await readNdef();
-  //     if (tag) {
-  //       setNfcTag(tag);
-  //       Alert.alert('Tag lida com sucesso!', JSON.stringify(tag));
-  //     } else {
-  //       Alert.alert('Nenhuma tag encontrada!');
-  //     }
-  //   } catch (error) {
-  //     console.error('Erro ao ler NFC:', error);
-  //     Alert.alert('Erro ao ler NFC', 'Ocorreu um erro ao tentar ler a tag.');
-  //   }
-  // };
+  if (loading) {
+    return (
+      <View style={styles.containerWaiting}>
+        <Text style={styles.title}>Aproxime o cartão de identificação</Text>
+        <ActivityIndicator size="large" color="#ffffff" />
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>APROXIME O CARTÃO AO SENSOR</Text>
-      {/* <Button title="Ler Tag NFC" onPress={handleReadNfc} />
-      {nfcTag && (
-        <Text style={styles.tagText}>
-          NFC Tag: {JSON.stringify(nfcTag)}
-        </Text>
-      )} */}
-      <StatusBar style="light" backgroundColor="#33cc95" />
+    <View style={styles.containerPersonalData}>
+      <Text style={styles.titlePersonalData}>ANTÔNIO CAETANO NEVES NETO</Text>
+      <Text style={styles.textSubtype}>CARD ID: <Text style={styles.textData}>{nfcTag?.id || 'Não encontrado'}</Text></Text>
+      <Text style={styles.textSubtype}>
+        SALDO USADO: <Text style={styles.textData}>R$ 5,60</Text>
+      </Text>
+      <Text style={styles.textSubtype}>
+        SALDO RESTANTE: <Text style={styles.textData}>R$ 45,70</Text>
+      </Text>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
+  containerWaiting: {
     flex: 1,
-    backgroundColor: '#33cc95', // Fundo verde
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#e52e4d',
   },
-  text: {
-    fontSize: 48, // Tamanho grande do texto
+  containerPersonalData: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: '#33cc95',
+    padding: 36
+  },
+  title: {
+    fontSize: 32,
     fontWeight: 'bold',
-    color: '#fff', // Texto em branco para contraste com o fundo
-    textAlign: 'center',
-    margin: 20,
+    marginBottom: 20,
+    color: '#f0f0f0',
+    marginHorizontal: 40,
+    textAlign: "center",
+    lineHeight: 48,
   },
-  tagText: {
-    marginTop: 20,
-    fontSize: 16,
-    color: '#fff',
+  card: {
+    width: '90%',
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    alignItems: 'center',
   },
+  textSubtype: {
+    fontSize: 24,
+    marginBottom: 20,
+    color: "#f0f0f0",
+    textAlign: "left",
+    fontWeight: "bold"
+  },
+  textData: {
+    fontSize: 20,
+    color: "#f0f0f0",
+    textAlign: "left",
+    
+  },
+  titlePersonalData: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 32,
+    color: '#f0f0f0',
+    textAlign: "left",
+    lineHeight: 40,
+  }
 });
+
+export default App;
