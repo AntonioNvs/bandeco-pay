@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { Image, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import NfcManager, { NfcTech } from 'react-native-nfc-manager';
 
 NfcManager.start();
@@ -8,6 +8,10 @@ const App = () => {
   const [nfcTag, setNfcTag] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isNfcActive, setIsNfcActive] = useState(false);
+
+  const raphinhaId = "64090D64"
+  const bernardoId = "8E87EE9C"
+  const antonioId = "7CA288BD"
 
   // Função para iniciar a leitura NFC
   const startNfcReading = async () => {
@@ -19,7 +23,7 @@ const App = () => {
       setNfcTag(tag);
       setLoading(false); // Finaliza o loading
       setIsNfcActive(true);
-
+      console.log(tag)
       // Aguarda 5 segundos e volta para a tela de leitura
       setTimeout(() => {
         setNfcTag(null); // Reseta os dados da tag
@@ -57,14 +61,20 @@ const App = () => {
   }
 
   return (
-    <View style={styles.containerPersonalData}>
-      <Text style={styles.titlePersonalData}>ANTÔNIO CAETANO NEVES NETO</Text>
-      <Text style={styles.textSubtype}>CARD ID: <Text style={styles.textData}>{nfcTag?.id || 'Não encontrado'}</Text></Text>
+    <View style={[
+        styles.containerPersonalData,
+        nfcTag?.id == raphinhaId ? {backgroundColor: "#e52e4d"} : {backgroundColor: "#33cc95"}
+      ]}>
+      <Image 
+        style={styles.img}
+        source={nfcTag?.id == raphinhaId ? require("./assets/error.png") : require("./assets/check_circle.png")}></Image>        
+      <Text style={styles.titlePersonalData}>{nfcTag?.id == raphinhaId ? "SALDO INDISPONÍVEL" : "TRANSAÇÃO OCORRIDA"}</Text>
+      <Text style={styles.textSubtype}>{nfcTag?.id == raphinhaId ? "RAPHAEL AROLDO CARREIRO MENDES" : "ANTÔNIO CAETANO NEVES NETO"}</Text>
       <Text style={styles.textSubtype}>
         SALDO USADO: <Text style={styles.textData}>R$ 5,60</Text>
       </Text>
       <Text style={styles.textSubtype}>
-        SALDO RESTANTE: <Text style={styles.textData}>R$ 45,70</Text>
+        SALDO RESTANTE: <Text style={styles.textData}>{nfcTag?.id == raphinhaId ? "R$ 1,70" : "R$ 45,60"}</Text>
       </Text>
     </View>
   );
@@ -81,7 +91,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     backgroundColor: '#33cc95',
-    padding: 36
+    padding: 24
   },
   title: {
     fontSize: 32,
@@ -94,7 +104,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '90%',
-    padding: 20,
+    padding: 12,
     backgroundColor: '#fff',
     borderRadius: 10,
     elevation: 4,
@@ -112,7 +122,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold"
   },
   textData: {
-    fontSize: 20,
+    fontSize: 24,
     color: "#f0f0f0",
     textAlign: "left",
     
@@ -124,6 +134,11 @@ const styles = StyleSheet.create({
     color: '#f0f0f0',
     textAlign: "left",
     lineHeight: 40,
+  },
+  img: {
+    width: 256,
+    height: 256,
+    alignSelf: "center"
   }
 });
 
