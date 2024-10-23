@@ -1,4 +1,6 @@
 import sqlite3
+import sys
+sys.append("./dependencies")
 
 # define connection and cursor
 
