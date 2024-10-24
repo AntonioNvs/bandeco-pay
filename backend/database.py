@@ -1,6 +1,8 @@
 import sqlite3
 import sys
-sys.append("./dependencies")
+sys.path.append("./dependencies")
+from dependencies.User import User
+from dependencies.Student import Student
 
 # define connection and cursor
 
@@ -108,7 +110,7 @@ VALUES (123, "Antonio Caetano", 201.50, 6.50)
 
 cursor.execute("""
 INSERT INTO Student 
-VALUES (2022043213, 0, 123)
+VALUES (2022043213, 4, 123)
 """)
 
 cursor.execute("""
@@ -125,9 +127,18 @@ VALUES (1, "pagamento_RU", 6.50, "RU01", 123, "CD01_043")
 
 def print_tables(table_name):
     cursor.execute(f"SELECT * FROM {table_name}")
-    print(cursor.fetchall())
+    return cursor.fetchall()
 
-print_tables("User")
-print_tables("Student")
-print_tables("Card")
-print_tables("Traction")
+print(print_tables("User"))
+datalist = print_tables("User")
+print(print_tables("Student"))
+print(print_tables("Card"))
+print(print_tables("Traction"))
+
+cursor.execute(f"""SELECT fump_level 
+               FROM 
+                User INNER JOIN Student ON User.user_id = Student.user_id 
+               WHERE 
+                User.user_id = 123""")
+f_level = cursor.fetchall()[0][0]
+print(f_level)

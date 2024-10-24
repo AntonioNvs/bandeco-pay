@@ -1,7 +1,7 @@
 import sys
-sys.append("./")
+sys.path.append("./")
 import sqlite3
-import User
+from User import User
 
 class Employee(User):
     def __init__(self, database_filename):

@@ -1,9 +1,10 @@
 import sys
-sys.append("./")
+sys.path.append("./")
 import sqlite3
-import User
+from User import User
 
 class Teacher(User):
+    
     def __init__(self, database_filename):
         super.__init__(database_filename)
         self.teacher_table_command = """CREATE TABLE IF NOT EXISTS

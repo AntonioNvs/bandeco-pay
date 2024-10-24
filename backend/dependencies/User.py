@@ -1,5 +1,5 @@
 import sys
-sys.append("./")
+sys.path.append("./")
 import sqlite3
 
 class User():
@@ -8,46 +8,55 @@ class User():
         self.cursor = self.conn.cursor()
         self.user_table_command = """CREATE TABLE IF NOT EXISTS
             User(
-                user_id INTEGER PRIMARY KEY, 
-                name TEXT, 
-                balance FLOAT, 
-                price_to_pay FLOAT
+                username TEXT PRIMARY KEY, 
+                name TEXT,
+                password TEXT, 
+                balance FLOAT
             );
         """
         self.cursor.execute(self.user_table_command)#USER
     
-    def getName(self, user_id):
+    def insertNewUser(self, username, name, password, balance):
+        insert_new_user_command = f"""
+        INSERT INTO User
+        VALUES ({username}, {name}, {password}, {balance})
+        """
+
+        self.cursor.execute(insert_new_user_command)
+        return True
+    
+    def getPassword(self, username):
+        get_password_command = f"""
+        SELECT password
+        FROM User
+        WHERE username = {username}
+        """
+        self.cursor.execute(get_password_command)
+        return ( self.cursor.fetchall()[0][0] )
+
+    def getName(self, username):
         get_name_command = f"""
         SELECT name
         FROM User
-        WHERE user_id = {user_id}
+        WHERE username = {username}
         """
         self.cursor.execute(get_name_command)
-        return (self.cursor.fetchall())
+        return ( self.cursor.fetchall()[0][0] )
     
-    def getBalance(self, user_id):
+    def getBalance(self, username):
         get_balance_command = f"""
         SELECT balance
         FROM User
-        WHERE user_id = {user_id}
+        WHERE username = {username}
         """
         self.cursor.execute(get_balance_command)
-        return (self.cursor.fetchall())
+        return ( self.cursor.fetchall()[0][0] )
     
-    def getPriceToPay(self, user_id):
-        get_pricetopay_command = f"""
-        SELECT price_to_pay
-        FROM User
-        WHERE user_id = {user_id}
-        """
-        self.cursor.execute(get_pricetopay_command)
-        return (self.cursor.fetchall())
-    
-    def setBalance(self, user_id, new_balance):
+    def setBalance(self, username, new_balance):
         set_balance_command = f"""
         UPDATE User
         SET balance = {new_balance}
-        WHERE user_id = {user_id}
+        WHERE username = {username}
         """
         self.cursor.execute(set_balance_command)
         self.conn.commit()
