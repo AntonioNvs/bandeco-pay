@@ -5,6 +5,7 @@ from dependencies.User import User
 from dependencies.Student import Student
 from dependencies.Employee import Employee
 from dependencies.Teacher import Teacher
+from dependencies.Restaurant import Restaurant
 #from dependencies.Transaction import Transaction
 #from dependencies.Card import Card
 
@@ -21,6 +22,7 @@ class Database():
         self.Student_Management = Student(conn=self.conn, cursor=self.cursor)
         self.Employee_Management = Employee(conn=self.conn, cursor=self.cursor)
         self.Teacher_Management = Teacher(conn=self.conn, cursor=self.cursor)
+        self.Restaurant_Management = Restaurant(conn=self.conn, cursor=self.cursor)
 
     def print_database(self):
         table_list = ["User", "Student", "Teacher", "Employee", "Card", "Transaction", "Restaurant", "Menu"]
@@ -94,6 +96,42 @@ class Database():
                 return 8.50
         #o usuario nao eh aluno nem empregado
         return 13.00
+    
+    def insertRestaurant(self, restaurant_id, restaurant_name):
+        """
+        restaurant_id: Inteiro representando o ID do restaurante. \n
+        restaurant_name: String contendo o nome do restaurante.
+        """
+        res = self.Restaurant_Management.insertRestaurant(restaurant_id=restaurant_id, restaurant_name=restaurant_name)
+        if res:
+            return True
+        return False
+        
+    def insertMenu(self, menu_description, day, meal_period, restaurant_name):
+        """
+        menu_description: String contendo toda a alimentação do dia. \n
+        day: Data em formato aaaa-mm-dd \n
+        meal_period: String contendo Almoco ou Janta. \n
+        restaurant_id: ID do restaurante que serve o menu descrito, no dia e período especificado. \n
+        """
+        get_id_command = f"""
+        SELECT restaurant_id
+        FROM Restaurant
+        WHERE restaurant_name = "{restaurant_name}"
+        """
+        restaurant_id = self.cursor.execute(get_id_command).fetchall()[0][0]
+        res = self.Restaurant_Management.insertMenu(menu_description=menu_description, day=day, meal_period=meal_period, restaurant_id=restaurant_id)
+        if res:
+            return True
+        return False
+    
+    def getMenu(self, restaurant_name, day, meal_period):
+        """
+        restaurant_name: String com o nome do restaurante.\n
+        day: Data em formato aaaa-mm-dd. \n
+        meal_period: String (Almoco ou Janta). \n
+        """
+        self.Restaurant_Management.getMenu(restaurant_name=restaurant_name, day=day, meal_period=meal_period)
 
 
 
