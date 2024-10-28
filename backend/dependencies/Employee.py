@@ -4,20 +4,30 @@ import sqlite3
 from User import User
 
 class Employee(User):
-    def __init__(self, database_filename):
-        super.__init__(database_filename)
+    def __init__(self, conn, cursor):
+        super().__init__(conn, cursor)
         self.employee_table_command = """CREATE TABLE IF NOT EXISTS
             Employee(
                 employee_id INTEGER PRIMARY KEY, 
-                user_id INTEGER,
-                FOREIGN KEY(user_id) REFERENCES User(user_id)
+                username TEXT,
+                FOREIGN KEY(username) REFERENCES User(username)
             );
         """
-        self.cursor.execute(self.employee_table_command)#EMPLOYEE
+        self.cursor.execute(self.employee_table_command)
+
+    def insertNewEmployee(self, username, name, password, balance, employee_id):
+        self.insertNewUser(username=username, name=name, password=password, balance=balance)
+        insert_employee_command = f"""
+        INSERT INTO Employee
+        VALUES ({employee_id}, "{username}")
+        """
+        self.cursor.execute(insert_employee_command)
+        return True
     
-    # TODO --> EmployeeId not well defined. It supposes Student is a single object, not a table.
-    # Requires some 'information' to search i.e. name, user_id, etc...
-    def getEmployeeId(self, user_id):
-        error = "Not implemented yet."
-        print(error)
-        return False
+    def getEmployeeId(self, username):
+        get_employeeid_command=f"""
+        SELECT employee_id
+        FROM Employee
+        WHERE username = "{username}"
+        """
+        return ( self.cursor.execute(get_employeeid_command).fetchall() )[0][0]
