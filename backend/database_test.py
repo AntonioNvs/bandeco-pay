@@ -7,7 +7,7 @@ from dependencies.Employee import Employee
 from dependencies.Teacher import Teacher
 from dependencies.Restaurant import Restaurant
 #from dependencies.Transaction import Transaction
-#from dependencies.Card import Card
+from dependencies.Card import Card
 
 def isnull(target):
     if (target==[]):
@@ -23,6 +23,7 @@ class Database():
         self.Employee_Management = Employee(conn=self.conn, cursor=self.cursor)
         self.Teacher_Management = Teacher(conn=self.conn, cursor=self.cursor)
         self.Restaurant_Management = Restaurant(conn=self.conn, cursor=self.cursor)
+        self.Card_Management = Card(conn=self.conn, cursor=self.cursor)
 
     def print_database(self):
         table_list = ["User", "Student", "Teacher", "Employee", "Card", "Transaction", "Restaurant", "Menu"]
@@ -67,7 +68,8 @@ class Database():
         new_balance = actual_balance + value_to_add
         self.User_Management.setBalance(username=username, new_balance=new_balance)
 
-    def subtractBalance(self, username, value_to_subtract):
+    def subtractBalance(self, card_id, value_to_subtract):
+        username = self.Card_Management.getOwner(card_id=card_id)
         actual_balance = self.getBalance(username)
         new_balance = actual_balance - value_to_subtract
         self.User_Management.setBalance(username=username, new_balance=new_balance)
