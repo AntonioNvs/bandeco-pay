@@ -17,6 +17,18 @@ def isnull(target):
         return True
     return False
 
+lunch ="""Salada de Alface Crespa
+Salada Tabule
+Feijão Carioca
+Isca de Frango Colorida
+Bife de milho
+Macarrão parafuso com brócolis
+Arroz Branco
+Molho de Hortelã
+Sobremesa Laranja
+Copo Refresco
+"""
+
 class Database():
     def __init__(self, database_filename):
         self.conn = sqlite3.connect(database_filename, check_same_thread=False)
@@ -28,16 +40,28 @@ class Database():
         self.Restaurant_Management = Restaurant(conn=self.conn, cursor=self.cursor)
         self.Card_Management = Card(conn=self.conn, cursor=self.cursor)
 
-        self.initialize_database_users()
+        self.initializate_database_data()
 
-    def initialize_database_users(self):
+    def initializate_database_data(self):
         try:
             self.insertNewStudent(username="antonio.caetano", name="Antonio Caetano Neves Neto", password=generate_password_hash("antoniosenha123"), registration_number=2022043555, fump_level=5)
         except:
             return
+        
         self.insertNewStudent(username="raphael.mendes", name="Raphael A. Carreiro Mendes", password=generate_password_hash("raphaelsenha123"), registration_number=2022043556, fump_level=4)
         self.insertNewStudent(username="bernardo.dutra", name="Bernardo Dutra Lemos", password=generate_password_hash("bdlemossenha123"), registration_number=2022043557, fump_level=2)
         self.insertNewStudent(username="joao.lucas", name="João Lucas Simões Moreira", password=generate_password_hash("joaolucassenha123"), registration_number=2022043558, fump_level=1)
+
+        self.insertRestaurant(restaurant_id=1, restaurant_name="Pampulha 1")
+        self.insertRestaurant(restaurant_id=2, restaurant_name="Pampulha 2")
+        self.insertRestaurant(restaurant_id=3, restaurant_name="Campus Saúde")
+        self.insertRestaurant(restaurant_id=4, restaurant_name="Campus Direito")
+        self.insertRestaurant(restaurant_id=5, restaurant_name="Campus ICA")
+
+        for date in ["2024-10-29", "2024-10-30", "2024-10-31", "2024-11-01", "2024-11-02"]:
+            for restaurant_name in ["Pampulha 1", "Pampulha 2", "Campus Saúde", "Campus Direito", "Campus ICA"]:
+                self.insertMenu(lunch, date, "Almoco", restaurant_name)
+                self.insertMenu(lunch, date, "Janta", restaurant_name)
 
     def print_database(self):
         table_list = ["User", "Student", "Teacher", "Employee", "Card", "Transaction", "Restaurant", "Menu"]
@@ -202,5 +226,5 @@ class Database():
         day: Data em formato aaaa-mm-dd. \n
         meal_period: String (Almoco ou Janta). \n
         """
-        self.Restaurant_Management.getMenu(restaurant_name=restaurant_name, day=day, meal_period=meal_period)
+        return self.Restaurant_Management.getMenu(restaurant_name=restaurant_name, day=day, meal_period=meal_period)
 

@@ -4,6 +4,8 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 
+from datetime import datetime
+
 from flask_jwt_extended import (
     JWTManager, create_access_token, jwt_required, get_jwt_identity
 )
@@ -20,7 +22,7 @@ app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 
 jwt = JWTManager(app)
 
-database = Database("database.db")
+database = Database("databases/database.db")
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -46,11 +48,15 @@ def login():
     
 @app.route("/menu", methods=["GET"])
 def get_today_restaurant_menu():
-    restaurant = request.form.get("restaurant")
+    restaurant_name = request.args.get("restaurant_name")
+    meal_period = request.args.get("meal_period")
+    print(restaurant_name)
+    today_date = datetime.today().strftime('%Y-%m-%d')
 
-    raise NotImplementedError("The connection with database will be implemented yet.")
-
-    return jsonify(), 200
+    menu = database.getMenu(restaurant_name, today_date, meal_period)
+    return jsonify({
+        "menu": menu.split("\n")
+    }), 200
 
 @app.route("/balance", methods=["GET"])
 # @jwt_required

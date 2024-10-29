@@ -35,6 +35,7 @@ class Restaurant():
         VALUES ({restaurant_id}, "{restaurant_name}")
         """
         self.cursor.execute(insert_restaurant_command)
+        self.conn.commit()
         return True
 
     def insertMenu(self, menu_description, day, meal_period, restaurant_id):
@@ -49,6 +50,7 @@ class Restaurant():
         VALUES ("{menu_description}", {day}, "{meal_period}", {restaurant_id})
         """
         self.cursor.execute(insert_menu_command)
+        self.conn.commit()
         return True
 
     def getMenu(self, restaurant_name, day, meal_period):
@@ -62,7 +64,7 @@ class Restaurant():
         FROM 
             Menu INNER JOIN Restaurant
             ON Restaurant.restaurant_id = Menu.restaurant_id
-        WHERE Restaurant.restaurant_name = "{restaurant_name}", Menu.day = {day}, Menu.meal_period = "{meal_period}"
+        WHERE Restaurant.restaurant_name = "{restaurant_name}" AND Menu.day = {day} AND Menu.meal_period = "{meal_period}"
         """
         return ( self.cursor.execute(get_menu_command).fetchall() )[0][0]
         

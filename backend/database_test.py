@@ -136,20 +136,43 @@ class Database():
         day: Data em formato aaaa-mm-dd. \n
         meal_period: String (Almoco ou Janta). \n
         """
-        self.Restaurant_Management.getMenu(restaurant_name=restaurant_name, day=day, meal_period=meal_period)
+        return self.Restaurant_Management.getMenu(restaurant_name=restaurant_name, day=day, meal_period=meal_period)
 
 
+lunch ="""Salada de Alface Crespa
+Salada Tabule
+Feijão Carioca
+Isca de Frango Colorida
+Bife de milho
+Macarrão parafuso com brócolis
+Arroz Branco
+Molho de Hortelã
+Sobremesa Laranja
+Copo Refresco
+"""
 
-database = Database("testdatabase.db")
-database.insertNewStudent(username="antonio.caetano", name="Antonio Caetano Neves Neto", password=generate_password_hash("antoniosenha123"), balance=10.50, registration_number=2022043555, fump_level=5)
-database.insertNewStudent(username="raphael.mendes", name="Raphael A. Carreiro Mendes", password=generate_password_hash("raphaelsenha123"), balance=5.60, registration_number=2022043556, fump_level=4)
-database.insertNewStudent(username="bernardo.dutra", name="Bernardo Dutra Lemos", password=generate_password_hash("bdlemossenha123"), balance=12.20, registration_number=2022043557, fump_level=2)
-database.insertNewStudent(username="joao.lucas", name="João Lucas Simões Moreira", password=generate_password_hash("joaolucassenha123"), balance=2.30, registration_number=2022043558, fump_level=1)
+database = Database("databases/testdatabase.db")
+database.insertRestaurant(restaurant_id=1, restaurant_name="Pampulha 1")
+database.insertRestaurant(restaurant_id=2, restaurant_name="Pampulha 2")
+database.insertRestaurant(restaurant_id=3, restaurant_name="Campus Saúde")
+database.insertRestaurant(restaurant_id=4, restaurant_name="Campus Direito")
+database.insertRestaurant(restaurant_id=5, restaurant_name="Campus ICA")
 
-print(f"""antonio balance: {database.getBalance("antonio.caetano")}""")
-print(f"""raphael balance: {database.getBalance("raphael.mendes")}""")
+for date in ["2024-10-29", "2024-10-30", "2024-10-31", "2024-11-01", "2024-11-02"]:
+    for restaurant_name in ["Pampulha 1", "Pampulha 2", "Campus Saúde", "Campus Direito", "Campus ICA"]:
+        database.insertMenu(lunch, date, "Almoco", restaurant_name)
+        database.insertMenu(lunch, date, "Janta", restaurant_name)
 
-print(f"""bernardo password: {database.getPassword("bernardo.dutra")}""")
-print(f"""joao lucas password: {database.getPassword("joao.lucas")}""")
+print(database.getMenu("Pampulha 1", "2024-10-29", "Almoco"))
+# database.insertNewStudent(username="antonio.caetano", name="Antonio Caetano Neves Neto", password=generate_password_hash("antoniosenha123"), balance=10.50, registration_number=2022043555, fump_level=5)
+# database.insertNewStudent(username="raphael.mendes", name="Raphael A. Carreiro Mendes", password=generate_password_hash("raphaelsenha123"), balance=5.60, registration_number=2022043556, fump_level=4)
+# database.insertNewStudent(username="bernardo.dutra", name="Bernardo Dutra Lemos", password=generate_password_hash("bdlemossenha123"), balance=12.20, registration_number=2022043557, fump_level=2)
+# database.insertNewStudent(username="joao.lucas", name="João Lucas Simões Moreira", password=generate_password_hash("joaolucassenha123"), balance=2.30, registration_number=2022043558, fump_level=1)
+
+# print(f"""antonio balance: {database.getBalance("antonio.caetano")}""")
+# print(f"""raphael balance: {database.getBalance("raphael.mendes")}""")
+
+# print(f"""bernardo password: {database.getPassword("bernardo.dutra")}""")
+# print(f"""joao lucas password: {database.getPassword("joao.lucas")}""")
 
 

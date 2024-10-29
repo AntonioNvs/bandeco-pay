@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 export const Container = styled.main`
-    max-width: 1120px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 2.5rem 1rem;
     
@@ -10,7 +10,7 @@ export const Container = styled.main`
 // Definindo o estilo para o container do dashboard
 export const DashboardContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);  /* Define 4 colunas de igual tamanho */
+  grid-template-columns: repeat(5, 1fr);  /* Define 4 colunas de igual tamanho */
   gap: 16px;  /* Espaçamento entre as colunas */
   padding: 20px;
 
