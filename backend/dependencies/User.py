@@ -49,7 +49,9 @@ class User():
         WHERE username = "{username}"
         """
         self.cursor.execute(get_balance_command)
-        return ( self.cursor.fetchall()[0][0] )
+        result = self.cursor.fetchall()
+        print(result)
+        return ( result[0][0] )
     
     def setBalance(self, username, new_balance):
         set_balance_command = f"""

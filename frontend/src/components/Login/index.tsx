@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ModalBackground, ModalContent } from './style';
 
+import axios from 'axios';
 
 interface LoginModalProps {
     isOpen: boolean;
@@ -12,20 +13,33 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    
+
     // Nesse camarada aqui que vamos puxar dados da api...
     const handleLogin = () => {
       // Simulação de credenciais de login
       const mockUsername = 'admin';
       const mockPassword = 'password123';
-  
-      if (username === mockUsername && password === mockPassword) {
-        setError('');
-        onLoginSuccess();  // Chama a função para indicar que o login foi bem-sucedido
-        onClose();  // Fecha o modal de login
-      } else {
-        setError('Usuário ou senha inválidos');
+      
+      const loginData = {
+        "username": username,
+        "password": password
       }
+
+      axios.post('http://127.0.0.1:5000/login', loginData)
+        .then(response => {
+          if (response.status == 200) {
+            console.log(response.data);
+            setError('');
+            onLoginSuccess();  
+            onClose();
+          } else {
+            // Não logado, deu erro
+            setError('Usuário ou senha inválidos');
+          }
+      })
+      .catch(error => {
+        console.error("Erro ao conectar com a API:", error);
+      });
     };
   
     if (!isOpen) return null;

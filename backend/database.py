@@ -9,6 +9,9 @@ from dependencies.Restaurant import Restaurant
 #from dependencies.Transaction import Transaction
 from dependencies.Card import Card
 
+from werkzeug.security import generate_password_hash
+
+
 def isnull(target):
     if (target==[]):
         return True
@@ -16,7 +19,7 @@ def isnull(target):
 
 class Database():
     def __init__(self, database_filename):
-        self.conn = sqlite3.connect(database_filename)
+        self.conn = sqlite3.connect(database_filename, check_same_thread=False)
         self.cursor = self.conn.cursor()
         self.User_Management = User(conn=self.conn, cursor=self.cursor)
         self.Student_Management = Student(conn=self.conn, cursor=self.cursor)
@@ -24,6 +27,17 @@ class Database():
         self.Teacher_Management = Teacher(conn=self.conn, cursor=self.cursor)
         self.Restaurant_Management = Restaurant(conn=self.conn, cursor=self.cursor)
         self.Card_Management = Card(conn=self.conn, cursor=self.cursor)
+
+        self.initialize_database_users()
+
+    def initialize_database_users(self):
+        try:
+            self.insertNewStudent(username="antonio.caetano", name="Antonio Caetano Neves Neto", password=generate_password_hash("antoniosenha123"), registration_number=2022043555, fump_level=5)
+        except:
+            return
+        self.insertNewStudent(username="raphael.mendes", name="Raphael A. Carreiro Mendes", password=generate_password_hash("raphaelsenha123"), registration_number=2022043556, fump_level=4)
+        self.insertNewStudent(username="bernardo.dutra", name="Bernardo Dutra Lemos", password=generate_password_hash("bdlemossenha123"), registration_number=2022043557, fump_level=2)
+        self.insertNewStudent(username="joao.lucas", name="João Lucas Simões Moreira", password=generate_password_hash("joaolucassenha123"), registration_number=2022043558, fump_level=1)
 
     def print_database(self):
         table_list = ["User", "Student", "Teacher", "Employee", "Card", "Transaction", "Restaurant", "Menu"]
@@ -189,19 +203,4 @@ class Database():
         meal_period: String (Almoco ou Janta). \n
         """
         self.Restaurant_Management.getMenu(restaurant_name=restaurant_name, day=day, meal_period=meal_period)
-
-
-
-database = Database("testdatabase.db")
-database.insertNewStudent(username="antonio.caetano", name="Antonio Caetano Neves Neto", password="antoniosenha123", registration_number=2022043555, fump_level=5)
-database.insertNewStudent(username="raphael.mendes", name="Raphael A. Carreiro Mendes", password="raphaelsenha123", registration_number=2022043556, fump_level=4)
-database.insertNewStudent(username="bernardo.dutra", name="Bernardo Dutra Lemos", password="bdlemossenha123", registration_number=2022043557, fump_level=2)
-database.insertNewStudent(username="joao.lucas", name="João Lucas Simões Moreira", password="joaolucassenha123", registration_number=2022043558, fump_level=1)
-
-print(f"""antonio balance: {database.getBalance("antonio.caetano")}""")
-print(f"""raphael balance: {database.getBalance("raphael.mendes")}""")
-
-print(f"""bernardo password: {database.getPassword("bernardo.dutra")}""")
-print(f"""joao lucas password: {database.getPassword("joao.lucas")}""")
-
 

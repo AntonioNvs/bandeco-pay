@@ -9,6 +9,9 @@ from dependencies.Restaurant import Restaurant
 #from dependencies.Transaction import Transaction
 from dependencies.Card import Card
 
+from werkzeug.security import generate_password_hash
+
+
 def isnull(target):
     if (target==[]):
         return True
@@ -138,10 +141,10 @@ class Database():
 
 
 database = Database("testdatabase.db")
-database.insertNewStudent(username="antonio.caetano", name="Antonio Caetano Neves Neto", password="antoniosenha123", balance=10.50, registration_number=2022043555, fump_level=5)
-database.insertNewStudent(username="raphael.mendes", name="Raphael A. Carreiro Mendes", password="raphaelsenha123", balance=5.60, registration_number=2022043556, fump_level=4)
-database.insertNewStudent(username="bernardo.dutra", name="Bernardo Dutra Lemos", password="bdlemossenha123", balance=12.20, registration_number=2022043557, fump_level=2)
-database.insertNewStudent(username="joao.lucas", name="João Lucas Simões Moreira", password="joaolucassenha123", balance=2.30, registration_number=2022043558, fump_level=1)
+database.insertNewStudent(username="antonio.caetano", name="Antonio Caetano Neves Neto", password=generate_password_hash("antoniosenha123"), balance=10.50, registration_number=2022043555, fump_level=5)
+database.insertNewStudent(username="raphael.mendes", name="Raphael A. Carreiro Mendes", password=generate_password_hash("raphaelsenha123"), balance=5.60, registration_number=2022043556, fump_level=4)
+database.insertNewStudent(username="bernardo.dutra", name="Bernardo Dutra Lemos", password=generate_password_hash("bdlemossenha123"), balance=12.20, registration_number=2022043557, fump_level=2)
+database.insertNewStudent(username="joao.lucas", name="João Lucas Simões Moreira", password=generate_password_hash("joaolucassenha123"), balance=2.30, registration_number=2022043558, fump_level=1)
 
 print(f"""antonio balance: {database.getBalance("antonio.caetano")}""")
 print(f"""raphael balance: {database.getBalance("raphael.mendes")}""")

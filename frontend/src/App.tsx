@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { Statement } from './components/Statement';
@@ -6,11 +6,13 @@ import { Account } from './components/Account';
 import { LoginModal } from './components/Login';
 import { GlobalStyle } from './styles/global';
 
+import axios from 'axios';
+
 class User {
   private name: string;
   private balance: number;
   private price_to_pay: number;
-
+ 
   constructor(name: string, balance: number, price_to_pay: number) {
     this.name = name;
     this.balance = balance;

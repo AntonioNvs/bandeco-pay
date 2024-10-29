@@ -23,6 +23,7 @@ class Student(User):
         VALUES ({registration_number}, {fump_level}, "{username}")
         """
         self.cursor.execute(insert_command_for_student)
+        self.conn.commit()
         return True
 
     def getFumpLevel(self, username):
