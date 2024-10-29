@@ -1,144 +1,207 @@
-import sqlite3
 import sys
 sys.path.append("./dependencies")
+import sqlite3
 from dependencies.User import User
 from dependencies.Student import Student
+from dependencies.Employee import Employee
+from dependencies.Teacher import Teacher
+from dependencies.Restaurant import Restaurant
+#from dependencies.Transaction import Transaction
+from dependencies.Card import Card
 
-# define connection and cursor
+def isnull(target):
+    if (target==[]):
+        return True
+    return False
 
-connection = sqlite3.connect('bandecopay.db')
+class Database():
+    def __init__(self, database_filename):
+        self.conn = sqlite3.connect(database_filename)
+        self.cursor = self.conn.cursor()
+        self.User_Management = User(conn=self.conn, cursor=self.cursor)
+        self.Student_Management = Student(conn=self.conn, cursor=self.cursor)
+        self.Employee_Management = Employee(conn=self.conn, cursor=self.cursor)
+        self.Teacher_Management = Teacher(conn=self.conn, cursor=self.cursor)
+        self.Restaurant_Management = Restaurant(conn=self.conn, cursor=self.cursor)
+        self.Card_Management = Card(conn=self.conn, cursor=self.cursor)
 
-cursor = connection.cursor()
+    def print_database(self):
+        table_list = ["User", "Student", "Teacher", "Employee", "Card", "Transaction", "Restaurant", "Menu"]
+        for table in table_list:
+            try:
+                print_database_command = f"""
+                SELECT *
+                FROM {table}
+                """
+                self.cursor.execute(print_database_command)
+                print(f"TABLE {table}", "\n")
+                for element in self.cursor.fetchall():
+                    print(element)
+                print("\n")
+            except:
+                print(f"no table {table} available yet")
+                continue
+    
+    def insertNewStudent(self, username, name, password, registration_number, fump_level):
+        """
+        username: String - Nome do usuário.\n
+        name: String - Nome completo do usuário.\n
+        password: String - Senha do usuário.\n
+        registration_number: Inteiro - N° de matrícula do aluno.\n
+        fump_level: Inteiro [1-5] - Grau do aluno na prioridade de assistência social (FUMP).\n
 
-# adding tables on db
+        returns: Verdadeiro, se não houve problemas em adicionar ao banco de dados.
+        """
+        result = self.Student_Management.insertNewStudent(username, name, password, 0.0, registration_number, fump_level)
+        if result:
+            return True
+        return False
+    
+    def insertNewTeacher(self, username, name, password, teacher_id ):
+        """
+        username: String - Nome do usuário.\n
+        name: String - Nome completo do usuário.\n
+        password: String - Senha do usuário.\n
+        teacher_id: Inteiro - ID do professor.\n
 
-user_table_command = """CREATE TABLE IF NOT EXISTS
-User(
-    user_id INTEGER PRIMARY KEY, 
-    name TEXT, 
-    balance FLOAT, 
-    price_to_pay FLOAT
-    );
-"""
+        returns: Verdadeiro, se não houve problemas em adicionar ao banco de dados.
+        """
+        result = self.Teacher_Management.insertNewTeacher(username=username, name=name, password=password, balance=0.0, teacher_id=teacher_id)
+        if result:
+            return True
+        return False
+    
+    def insertNewEmployee(self, username, name, password, employee_id):
+        """
+        username: String - Nome do usuário.\n
+        name: String - Nome completo do usuário.\n
+        password: String - Senha do usuário.\n
+        employee_id: Inteiro - ID do empregado.\n
 
-cursor.execute(user_table_command)#USER
+        returns: Verdadeiro, se não houve problemas em adicionar ao banco de dados.
+        """
+        result = self.Employee_Management.insertNewEmployee(username=username, name=name, password=password, balance=0.0, employee_id=employee_id)
+        if result:
+            return True
+        return False
+    
+    def getBalance(self, username):
+        """
+        username: String contendo o nome do usuário. \n
 
-student_table_command = """CREATE TABLE IF NOT EXISTS
-Student(
-    registration_number INTEGER PRIMARY KEY,  
-    fump_level INTEGER,
-    user_id INTEGER,
-    FOREIGN KEY(user_id) REFERENCES User(user_id)
-    );
-"""
+        returns: Float contendo o saldo do usuário.
+        """
+        return self.User_Management.getBalance(username=username)
+    
+    def getOwner(self, card_id):
+        """
+        card_id: String representando o ID do cartão.\n
 
-cursor.execute(student_table_command)#STUDENT
+        return: String contendo o nome do usuário que é dono do cartão.
+        """
+        return self.Card_Management.getOwner(card_id=card_id)
+    
+    def addBalance(self, username, value_to_add):
+        """
+        username: String contendo o nome do usuário a receber o valor especificado. \n
+        value_to_add: Float representando o valor a ser adicionado.
+        """
+        actual_balance = self.getBalance(username)
+        new_balance = actual_balance + value_to_add
+        self.User_Management.setBalance(username=username, new_balance=new_balance)
 
-employee_table_command = """CREATE TABLE IF NOT EXISTS
-Employee(
-    employee_id INTEGER PRIMARY KEY, 
-    user_id INTEGER,
-    FOREIGN KEY(user_id) REFERENCES User(user_id)
-    );
-"""
+    def subtractBalance(self, username, value_to_subtract):
+        """
+        username: String contendo o nome do usuário a perder o valor especificado. \n
+        value_to_add: Float representando o valor a ser subtraído.
+        """
+        actual_balance = self.getBalance(username)
+        new_balance = actual_balance - value_to_subtract
+        self.User_Management.setBalance(username=username, new_balance=new_balance)
 
-cursor.execute(employee_table_command)#EMPLOYEE
+    def getPassword(self, username):
+        """
+        username: String contendo o nome do usuário.\n
 
-teacher_table_command = """CREATE TABLE IF NOT EXISTS
-Teacher(
-    teacher_id INTEGER PRIMARY KEY, 
-    user_id INTEGER,
-    FOREIGN KEY(user_id) REFERENCES User(user_id)
-    );
-"""
+        returns: String contendo a senha do usuário.
+        """
+        return self.User_Management.getPassword(username=username)
+    
+    def getAmounttoPay(self, username):
+        """
+        username: String contendo o nome do usuário.
 
-cursor.execute(teacher_table_command)#TEACHER
+        returns: Float contendo o valor a ser pago em uma refeição pelo usuário.
+        """
+        #testando se usuario é aluno, empregado ou professor para definir o preço a pagar
+        command_for_student = f"""
+        SELECT fump_level
+        FROM Student
+        WHERE username = "{username}"
+        """
+        result = self.cursor.execute(command_for_student).fetchall()
+        if (not (isnull(result)) ): #alunos dependem do seu nivel de fump
+            return self.Student_Management.getAmounttoPay(username=username)
+        else:
+            command_for_employee = f"""
+            SELECT *
+            FROM Employee
+            WHERE username = "{username}"
+            """
+            result = self.cursor.execute(command_for_employee).fetchall()
+            if (not (isnull(result)) ): #empregados paga 8.50
+                return 8.50
+        #o usuario nao eh aluno nem empregado
+        return 13.00
+    
+    def insertRestaurant(self, restaurant_id, restaurant_name):
+        """
+        restaurant_id: Inteiro representando o ID do restaurante. \n
+        restaurant_name: String contendo o nome do restaurante.
+        """
+        res = self.Restaurant_Management.insertRestaurant(restaurant_id=restaurant_id, restaurant_name=restaurant_name)
+        if res:
+            return True
+        return False
+        
+    def insertMenu(self, menu_description, day, meal_period, restaurant_name):
+        """
+        menu_description: String contendo toda a alimentação do dia. \n
+        day: Data em formato aaaa-mm-dd \n
+        meal_period: String contendo Almoco ou Janta. \n
+        restaurant_id: ID do restaurante que serve o menu descrito, no dia e período especificado. \n
+        """
+        get_id_command = f"""
+        SELECT restaurant_id
+        FROM Restaurant
+        WHERE restaurant_name = "{restaurant_name}"
+        """
+        restaurant_id = self.cursor.execute(get_id_command).fetchall()[0][0]
+        res = self.Restaurant_Management.insertMenu(menu_description=menu_description, day=day, meal_period=meal_period, restaurant_id=restaurant_id)
+        if res:
+            return True
+        return False
+    
+    def getMenu(self, restaurant_name, day, meal_period):
+        """
+        restaurant_name: String com o nome do restaurante.\n
+        day: Data em formato aaaa-mm-dd. \n
+        meal_period: String (Almoco ou Janta). \n
+        """
+        self.Restaurant_Management.getMenu(restaurant_name=restaurant_name, day=day, meal_period=meal_period)
 
-card_table_command = """CREATE TABLE IF NOT EXISTS
-Card(
-    card_id TEXT PRIMARY KEY,
-    user_id INTEGER,
-    FOREIGN KEY(user_id) REFERENCES User(user_id)
-    );
-"""
 
-cursor.execute(card_table_command) #CARD
 
-restaurant_table_command = """CREATE TABLE IF NOT EXISTS
-Restaurant(
-    restaurant_id INTEGER PRIMARY KEY,
-    restaurant_name TEXT
-    );
-"""
+database = Database("testdatabase.db")
+database.insertNewStudent(username="antonio.caetano", name="Antonio Caetano Neves Neto", password="antoniosenha123", registration_number=2022043555, fump_level=5)
+database.insertNewStudent(username="raphael.mendes", name="Raphael A. Carreiro Mendes", password="raphaelsenha123", registration_number=2022043556, fump_level=4)
+database.insertNewStudent(username="bernardo.dutra", name="Bernardo Dutra Lemos", password="bdlemossenha123", registration_number=2022043557, fump_level=2)
+database.insertNewStudent(username="joao.lucas", name="João Lucas Simões Moreira", password="joaolucassenha123", registration_number=2022043558, fump_level=1)
 
-cursor.execute(restaurant_table_command)#RESTAURANT
+print(f"""antonio balance: {database.getBalance("antonio.caetano")}""")
+print(f"""raphael balance: {database.getBalance("raphael.mendes")}""")
 
-menu_table_command = """CREATE TABLE IF NOT EXISTS
-Menu(
-    menu_description TEXT,
-    day DATE,
-    day_period TEXT,
-    restaurant_id INTEGER,
-    FOREIGN KEY(restaurant_id) REFERENCES Restaurant(restaurant_id)
-    );
-"""
+print(f"""bernardo password: {database.getPassword("bernardo.dutra")}""")
+print(f"""joao lucas password: {database.getPassword("joao.lucas")}""")
 
-cursor.execute(menu_table_command)
 
-transaction_table_command = """CREATE TABLE IF NOT EXISTS
-Traction(
-    transaction_id INTEGER PRIMARY KEY,
-    transaction_type TEXT,
-    transaction_value FLOAT,
-    transaction_date DATE,
-    restaurant TEXT,
-    user_id INTEGER,
-    card_id TEXT,
-    FOREIGN KEY(user_id) REFERENCES User(user_id),
-    FOREIGN KEY(card_id) REFERENCES Card(card_id)
-    );
-"""
-
-cursor.execute(transaction_table_command)
-
-# insert examples
-
-cursor.execute("""
-INSERT INTO User
-VALUES (123, "Antonio Caetano", 201.50, 6.50)
-""")
-
-cursor.execute("""
-INSERT INTO Student 
-VALUES (2022043213, 4, 123)
-""")
-
-cursor.execute("""
-INSERT INTO Card
-VALUES ("CD01_043", 123)
-""")
-
-cursor.execute("""
-INSERT INTO Traction
-VALUES (1, "pagamento_RU", 6.50, "RU01", 123, "CD01_043")
-""")
-
-# get tables function
-
-def print_tables(table_name):
-    cursor.execute(f"SELECT * FROM {table_name}")
-    return cursor.fetchall()
-
-print(print_tables("User"))
-datalist = print_tables("User")
-print(print_tables("Student"))
-print(print_tables("Card"))
-print(print_tables("Traction"))
-
-cursor.execute(f"""SELECT fump_level 
-               FROM 
-                User INNER JOIN Student ON User.user_id = Student.user_id 
-               WHERE 
-                User.user_id = 123""")
-f_level = cursor.fetchall()[0][0]
-print(f_level)

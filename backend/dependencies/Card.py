@@ -16,6 +16,9 @@ class Card():
         cursor.execute(card_table_command)
 
     def getOwner(self, card_id):
+        """
+        card_id: String representando o ID do cartão.
+        """
         get_owner_command = f"""
         SELECT username
         FROM Card
