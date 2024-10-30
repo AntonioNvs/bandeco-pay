@@ -46,6 +46,8 @@ function App() {
   );
   const [currentView, setCurrentView] = useState<'dashboard' | 'statement'>('dashboard'); // Controla o conteúdo exibido
 
+  const [token, setToken] = useState('');
+
   const toggleLoginModal = () => {
     setIsLoginOpen(!isLoginOpen);
   };
@@ -57,6 +59,7 @@ function App() {
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setToken('');
     localStorage.removeItem('isAuthenticated');
   };
 
@@ -67,6 +70,10 @@ function App() {
   const handleViewDashboard = () => {
     setCurrentView('dashboard'); // Volta para o dashboard
   };
+
+  const handleToken = (token: string) => {
+    setToken(token);
+  }
 
   return (
     <>
@@ -83,7 +90,7 @@ function App() {
           <Dashboard />
         ) : (
           <div>
-            <Account user={user} /> {/* Podemos buscar na api */}
+            <Account token={token} /> {/* Podemos buscar na api */}
             <Statement onBackToDashboard={handleViewDashboard} /> {/* Exibe o extrato*/}
           </div>
         )
@@ -92,7 +99,7 @@ function App() {
       )}
       
 
-      <LoginModal isOpen={isLoginOpen} onClose={toggleLoginModal} onLoginSuccess={handleLoginSuccess} />
+      <LoginModal isOpen={isLoginOpen} onClose={toggleLoginModal} onLoginSuccess={handleLoginSuccess} setToken={handleToken} />
       <GlobalStyle />
     </>
   );

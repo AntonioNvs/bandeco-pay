@@ -7,9 +7,10 @@ interface LoginModalProps {
     isOpen: boolean;
     onClose: () => void;
     onLoginSuccess: () => void; // Nova prop para chamar quando o login for bem-sucedido
+    setToken: (token: string) => void;
   }
   
-export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess }) => {
+export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess, setToken }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -28,7 +29,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
       axios.post('http://127.0.0.1:5000/login', loginData)
         .then(response => {
           if (response.status == 200) {
-            console.log(response.data);
+            //console.log(response.data);
+            setToken(response.data.access_token);
             setError('');
             onLoginSuccess();  
             onClose();
@@ -38,6 +40,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
           }
       })
       .catch(error => {
+        setError('Usuário ou senha inválidos');
         console.error("Erro ao conectar com a API:", error);
       });
     };

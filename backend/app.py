@@ -59,15 +59,19 @@ def get_today_restaurant_menu():
     }), 200
 
 @app.route("/balance", methods=["GET"])
-# @jwt_required
+@jwt_required(False)
 def get_balance_of_user():
-    # username = get_jwt_identity()
+    # Obtém o nome de usuário do token JWT
+    username = get_jwt_identity()
     
-    balance = database.getBalance("antonio.caetano") 
+    # Busca o saldo do usuário a partir do banco de dados
+    balance = database.getBalance(username) 
 
     return jsonify({
+        "name": username,
         "balance": balance
     }), 200
+
 
 @app.route("/add_balance", methods=["PUT"])
 @jwt_required
