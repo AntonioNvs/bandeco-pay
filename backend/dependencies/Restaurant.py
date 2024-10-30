@@ -24,6 +24,8 @@ class Restaurant():
             );
         """
         self.cursor.execute(self.menu_table_command)
+        
+        self.conn.commit()
 
     def insertRestaurant(self, restaurant_id, restaurant_name):
         """

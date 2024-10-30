@@ -15,6 +15,7 @@ class Student(User):
             );
             """
         self.cursor.execute(self.student_table_command)
+        self.conn.commit()
     
     def insertNewStudent(self, username, name, password, balance, registration_number, fump_level):
         self.insertNewUser(username, name, password, balance)

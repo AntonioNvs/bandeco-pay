@@ -14,6 +14,7 @@ class Employee(User):
             );
         """
         self.cursor.execute(self.employee_table_command)
+        self.conn.commit()
 
     def insertNewEmployee(self, username, name, password, balance, employee_id):
         self.insertNewUser(username=username, name=name, password=password, balance=balance)
@@ -22,6 +23,7 @@ class Employee(User):
         VALUES ({employee_id}, "{username}")
         """
         self.cursor.execute(insert_employee_command)
+        self.conn.commit()
         return True
     
     def getEmployeeId(self, username):

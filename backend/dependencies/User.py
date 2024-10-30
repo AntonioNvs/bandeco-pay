@@ -15,6 +15,7 @@ class User():
             );
         """
         self.cursor.execute(self.user_table_command)#USER
+        self.conn.commit()
     
     def insertNewUser(self, username, name, password, balance):
         insert_new_user_command = f"""
@@ -22,6 +23,7 @@ class User():
         VALUES ( "{username}", "{name}", "{password}", {balance} )
         """
         self.cursor.execute(insert_new_user_command)
+        self.conn.commit()
         return True
     
     def getPassword(self, username):

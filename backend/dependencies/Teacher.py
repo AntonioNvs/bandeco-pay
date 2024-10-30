@@ -14,6 +14,7 @@ class Teacher(User):
             );
         """
         self.cursor.execute(self.teacher_table_command)
+        self.conn.commit()
 
     def insertNewTeacher(self, username, name, password, balance, teacher_id):
         self.insertNewUser(username=username, name=name, password=password, balance=balance)
@@ -22,6 +23,7 @@ class Teacher(User):
         VALUES ({teacher_id}, "{username}")
         """
         self.cursor.execute(insert_teacher_command)
+        self.conn.commit()
         return True
     
     def getTeacherId(self, username):

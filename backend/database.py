@@ -6,7 +6,7 @@ from dependencies.Student import Student
 from dependencies.Employee import Employee
 from dependencies.Teacher import Teacher
 from dependencies.Restaurant import Restaurant
-#from dependencies.Transaction import Transaction
+from dependencies.Transaction import Transaction
 from dependencies.Card import Card
 
 from werkzeug.security import generate_password_hash
@@ -39,6 +39,7 @@ class Database():
         self.Teacher_Management = Teacher(conn=self.conn, cursor=self.cursor)
         self.Restaurant_Management = Restaurant(conn=self.conn, cursor=self.cursor)
         self.Card_Management = Card(conn=self.conn, cursor=self.cursor)
+        self.Transaction_Management = Transaction(conn=self.conn, cursor=self.cursor)
 
         self.initializate_database_data()
 
@@ -123,6 +124,15 @@ class Database():
             return True
         return False
     
+    def insertNewTransaction(self, type, value, transaction_date, username, restaurant_name=""):
+        result = self.Transaction_Management.insertTransaction(type=type, value=value, transaction_date=transaction_date, username=username, restaurant_name=restaurant_name)
+        if result:
+            return True
+        return False
+    
+    def getTransactionsforUser(self, username):
+        return self.Transaction_Management.retrieveUserTransaction(username=username)
+
     def getBalance(self, username):
         """
         username: String contendo o nome do usuário. \n
