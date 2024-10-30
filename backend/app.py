@@ -58,6 +58,19 @@ def get_today_restaurant_menu():
         "menu": menu.split("\n")
     }), 200
 
+
+@app.route("/get_user_name", methods=["GET"])
+@jwt_required(False)
+def get_user_name():
+    # Obtém o nome de usuário do token JWT
+    username = get_jwt_identity()
+    
+    name = database.getUserName(username)
+
+    return jsonify({
+        "name": name
+    }), 200
+
 @app.route("/balance", methods=["GET"])
 @jwt_required(False)
 def get_balance_of_user():
@@ -92,14 +105,27 @@ def subtract_balance_of_user():
 
     return jsonify(logged_in_as=username), 200 
 
-# @app.route("/history", methods=["GET"])
-# @jwt_required
-# def get_history_of_uses():
-#     username = get_jwt_identity()
+@app.route("/history", methods=["GET"])
+@jwt_required(False)
+def get_history_of_transactions():
+    username = get_jwt_identity()
 
-#     raise NotImplementedError("The connection with database will be implemented yet.")
-
-#     return jsonify(logged_in_as=username), 200
+    return jsonify({
+        "transactions": [
+            {
+                "date": "10/10/2024",
+                "description": "Pampulha 1",
+                "value": 10.5,
+                "type": "spend"
+            },
+            {
+                "date": "09/10/2024",
+                "description": "Pix",
+                "value": 40,
+                "type": "received"
+            }
+        ]
+    }), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

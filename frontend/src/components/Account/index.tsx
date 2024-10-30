@@ -16,19 +16,27 @@ interface User {
 
 const fetchUserData = async (token: string) => {
   try {
-    const response = await axios.get('http://127.0.0.1:5000/balance', {
+    console.log(token)
+    const responseBalance = await axios.get('http://127.0.0.1:5000/balance', {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
 
-    const data = response.data;
-    //console.log(data);
+    const responseName = await axios.get('http://127.0.0.1:5000/get_user_name', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    const dataBalance = responseBalance.data;
+    const dataName = responseName.data;
     
     return {
-      name: data.name,
-      balance: data.balance,
+      name: dataName.name,
+      balance: dataBalance.balance,
     };
   } catch (error) {
     console.error('Failed to fetch user data', error);

@@ -139,6 +139,15 @@ class Database():
         """
         return self.Card_Management.getOwner(card_id=card_id)
     
+    def getUserName(self, username):
+        """
+        username: String, representando o username do usuário
+
+        return: String, nome completo do usuário
+        """
+
+        return self.User_Management.getName(username)
+
     def addBalance(self, username, value_to_add):
         """
         username: String contendo o nome do usuário a receber o valor especificado. \n
