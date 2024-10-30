@@ -64,6 +64,10 @@ class Database():
                 self.insertMenu(lunch, date, "Almoco", restaurant_name)
                 self.insertMenu(lunch, date, "Janta", restaurant_name)
 
+        self.insertNewCard(card_id="7CA288BD", username="antonio.caetano")
+        self.insertNewCard(card_id="64090D64", username="raphael.mendes")
+        self.insertNewCard(card_id="8E87EE9C", username="bernardo.dutra")
+
     def print_database(self):
         table_list = ["User", "Student", "Teacher", "Employee", "Card", "Transaction", "Restaurant", "Menu"]
         for table in table_list:
@@ -80,7 +84,18 @@ class Database():
             except:
                 print(f"no table {table} available yet")
                 continue
+            
     
+    def insertNewCard(self, card_id, username):
+        """
+        card_id: String - Identificador Único do cartão do usuário
+        username: String - Nome do usuário.\n
+
+        returns: Verdadeiro, se não houve problemas em adicionar ao banco de dados.
+        """
+        return self.Card_Management.insertNewCard(card_id, username)
+
+
     def insertNewStudent(self, username, name, password, registration_number, fump_level):
         """
         username: String - Nome do usuário.\n
@@ -124,13 +139,33 @@ class Database():
             return True
         return False
     
-    def insertNewTransaction(self, type, value, transaction_date, username, restaurant_name=""):
-        result = self.Transaction_Management.insertTransaction(type=type, value=value, transaction_date=transaction_date, username=username, restaurant_name=restaurant_name)
+    def insertNewTransaction(self, type_, value, transaction_date, username, restaurant_id=1):
+        card_id = self.Card_Management.getCardIdFromUserName(username=username)
+        
+        result = self.Transaction_Management.insertTransaction(
+            type_=type_, 
+            value=value, 
+            transaction_date=transaction_date, 
+            username=username, 
+            card_id=card_id,
+            restaurant_id=restaurant_id
+        )
+        
         if result:
             return True
         return False
-    
-    def getTransactionsforUser(self, username):
+
+
+    def getRestaurantNameById(self, restaurant_id):
+        """
+            restaurant_id: int, identificador único do restaurante
+
+            returns: string, nome do restaurante
+        """
+        return self.Restaurant_Management.getRestaurantNameById(restaurant_id)
+
+
+    def getTransactionsByUser(self, username):
         return self.Transaction_Management.retrieveUserTransaction(username=username)
 
     def getBalance(self, username):

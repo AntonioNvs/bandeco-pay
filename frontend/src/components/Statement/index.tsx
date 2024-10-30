@@ -8,7 +8,7 @@ interface Compra {
   date: string;
   value: number;
   description: string;
-  type: 'spend' | 'received'
+  type: 'debit' | 'credit'
 }
 
 const formatCurrency = (value: number) => {
@@ -21,15 +21,21 @@ const formatCurrency = (value: number) => {
 interface StatementProps {
   token: string
   onBackToDashboard: () => void; // Função para voltar ao dashboard
+  setBalanceUpdated: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export const Statement: React.FC<StatementProps> = ({ token, onBackToDashboard }) => {
+export const Statement: React.FC<StatementProps> = ({ token, onBackToDashboard, setBalanceUpdated }) => {
   const [compras, setCompras] = useState<Compra[]>([]); // Estado para armazenar as compras
   const [modalVisible, setModalVisible] = useState(false);
   const [newBalance, setNewBalance] = useState('');
 
   // Simula uma "API" que traz os dados das compras após 2 segundos
   useEffect(() => {
+    handleTransactionsAPI()
+  }, []);
+
+  // Função para chamar a API de transações
+  const handleTransactionsAPI = () => {
     axios.get('http://127.0.0.1:5000/history', {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -40,23 +46,7 @@ export const Statement: React.FC<StatementProps> = ({ token, onBackToDashboard }
         setCompras(response.data.transactions)
       }
     })
-
-    // const fakeApiCall = () => {
-    //   const comprasSimuladas: Compra[] = [
-    //     { data: '10/10/2024', valor: '- R$ 10,50', descricao: 'Compra no Bandeco' },
-    //     { data: '09/10/2024', valor: '+ R$ 50,00', descricao: 'Depósito' },
-    //     { data: '08/10/2024', valor: '- R$ 20,00', descricao: 'Compra de Livros' },
-    //     { data: '07/10/2024', valor: '- R$ 15,00', descricao: 'Compra de Material' },
-    //   ];
-    //   return comprasSimuladas;
-    // };
-
-    // // Simula o comportamento de delay de uma API
-    // setTimeout(() => {
-    //   const compras = fakeApiCall();
-    //   setCompras(compras); // Atualiza o estado com os dados simulados
-    // }, 1000); // 2 segundos de delay para simular uma API
-  }, []);
+  }
 
   // Função para abrir o modal
   const handleAddBalanceClick = () => {
@@ -71,10 +61,12 @@ export const Statement: React.FC<StatementProps> = ({ token, onBackToDashboard }
   };
 
   const handleAddBalance = () => {
-    if (newBalance) {
+    if (newBalance && Number(newBalance) > 0) {
 
       axios.post('http://127.0.0.1:5000/add_balance', {
-        value: Number(newBalance)
+        value: Number(newBalance),
+        type: "Pix"
+        // Adicionar aqui se o tipo da transação foi Pix ou Crédito
       }, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -84,15 +76,12 @@ export const Statement: React.FC<StatementProps> = ({ token, onBackToDashboard }
         console.log(response.data)
       })
 
-      // const valorFormatado = formatCurrency(parseFloat(newBalance)); // Formatar o valor como moeda
-      const novaCompra: Compra = {
-        date: new Date().toLocaleDateString(),
-        value: Number(newBalance),  // Usar valor formatado
-        description: 'Depósito',
-        type: 'received'
-      };
-      setCompras([...compras, novaCompra]);
-      handleCloseModal(); // Fechar modal após adicionar saldo
+      setTimeout(() => {
+        handleTransactionsAPI();
+        setBalanceUpdated(l => !l);
+        handleCloseModal(); // Fechar modal após adicionar saldo
+      }, 200);
+
     }
   };
   
@@ -120,9 +109,9 @@ export const Statement: React.FC<StatementProps> = ({ token, onBackToDashboard }
             ) : (
               compras.map((compra, index) => (
                 <tr key={index}>
-                  <td className={compra.type === "spend" ? "spend" : "received"}>{compra.date}</td>
-                  <td className={compra.type === "spend" ? "spend" : "received"}>{compra.description}</td>
-                  <td className={compra.type === "spend" ? "spend" : "received"}>
+                  <td className={compra.type === "debit" ? "debit" : "credit"}>{compra.date}</td>
+                  <td className={compra.type === "debit" ? "debit" : "credit"}>{compra.description}</td>
+                  <td className={compra.type === "debit" ? "debit" : "credit"}>
                     {formatCurrency(compra.value)}
                   </td>
                 </tr>

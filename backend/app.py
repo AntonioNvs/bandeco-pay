@@ -4,7 +4,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask_jwt_extended import (
     JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -19,6 +19,7 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 
 jwt = JWTManager(app)
 
@@ -37,7 +38,7 @@ def login():
         }), 401
       
     if check_password_hash(database_password, password):
-        access_token = create_access_token(identity=username)
+        access_token = create_access_token(identity=username, expires_delta=timedelta(hours=1))
         return jsonify({
             "access_token": access_token
         }), 200
@@ -50,7 +51,7 @@ def login():
 def get_today_restaurant_menu():
     restaurant_name = request.args.get("restaurant_name")
     meal_period = request.args.get("meal_period")
-    print(restaurant_name)
+
     today_date = datetime.today().strftime('%Y-%m-%d')
 
     menu = database.getMenu(restaurant_name, today_date, meal_period)
@@ -86,21 +87,29 @@ def get_balance_of_user():
     }), 200
 
 
-@app.route("/add_balance", methods=["GET"])
-# @jwt_required(False)
+@app.route("/add_balance", methods=["POST"])
+@jwt_required(False)
 def add_balance_of_user():
-    # username = get_jwt_identity()
-    # balance_to_be_add = request.json.get("value")
+    username = get_jwt_identity()
+    balance_to_be_add = request.json.get("value")
+    type_ = request.json.get("type")
 
     database.insertNewTransaction(
-        type="received",
-        value=10,
+        type_=type_,
+        value=float(balance_to_be_add),
         transaction_date=datetime.today().strftime('%Y-%m-%d'),
-        username="antonio.caetano",
-        restaurant_name="none"
+        username=username,
+        restaurant_id=1
     )
 
-    return jsonify({}), 200 
+    database.addBalance(
+        username=username,
+        value_to_add=balance_to_be_add
+    )
+    
+    return jsonify({
+        "msg": "succeed"
+    }), 200 
 
 
 @app.route("/subtract_balance", methods=["PUT"])
@@ -116,22 +125,27 @@ def subtract_balance_of_user():
 @jwt_required(False)
 def get_history_of_transactions():
     username = get_jwt_identity()
+    columns = ["transaction_id", "type", "value", "date", "username", "card_id", "restaurant_id"]
+    transactions = database.getTransactionsByUser(username)
+
+    rows = [{columns[idx]: attribute for idx, attribute in enumerate(transaction)} for transaction in transactions]
+
+    # Adquirindo os nomes dos restaurantes
+    for row in rows:
+        restaurant_name = database.getRestaurantNameById(row["restaurant_id"])
+
+        row["description"] = restaurant_name if row["type"] == "debit" else row["type"]
+        
+        if row["type"] != "debit":
+            row["type"] = "credit"
+
+        del row["restaurant_id"]
+        del row["username"]
+        del row["card_id"]
+
 
     return jsonify({
-        "transactions": [
-            {
-                "date": "10/10/2024",
-                "description": "Pampulha 1",
-                "value": 10.5,
-                "type": "spend"
-            },
-            {
-                "date": "09/10/2024",
-                "description": "Pix",
-                "value": 40,
-                "type": "received"
-            }
-        ]
+        "transactions": rows
     }), 200
 
 if __name__ == '__main__':

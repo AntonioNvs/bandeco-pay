@@ -39,6 +39,7 @@ class User {
 }
 
 function App() {
+  const [balanceUpdated, setBalanceUpdated] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(
     () => !!localStorage.getItem('isAuthenticated') // Verifica se está logado ao carregar
@@ -101,8 +102,11 @@ function App() {
           <Dashboard />
         ) : (
           <div>
-            <Account token={token} /> {/* Podemos buscar na api */}
-            <Statement token={token} onBackToDashboard={handleViewDashboard} /> {/* Exibe o extrato*/}
+            <Account token={token} balanceUpdated={balanceUpdated}/> {/* Podemos buscar na api */}
+            <Statement 
+              token={token} 
+              setBalanceUpdated={setBalanceUpdated} 
+              onBackToDashboard={handleViewDashboard} /> {/* Exibe o extrato*/}
           </div>
         )
       ) : (

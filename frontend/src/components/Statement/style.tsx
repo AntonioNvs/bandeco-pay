@@ -32,11 +32,11 @@ export const StatementContainer = styled.div`
       filter: brightness(0.9);
     }
   }
-  .spend {
+  .debit {
     color: var(--red);
   }
 
-  .received {
+  .credit {
     color: var(--green);
   }
 `;

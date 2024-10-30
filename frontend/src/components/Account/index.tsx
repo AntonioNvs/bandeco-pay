@@ -44,7 +44,7 @@ const fetchUserData = async (token: string) => {
 };
 
 
-export const Account: React.FC<{ token: string }> = ({ token }) => {
+export const Account: React.FC<{ token: string, balanceUpdated: boolean }> = ({ token, balanceUpdated }) => {
   const [isHidden, setIsHidden] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
@@ -57,7 +57,7 @@ export const Account: React.FC<{ token: string }> = ({ token }) => {
     };
 
     loadUserData();
-  }, [token]);
+  }, [balanceUpdated]);
 
   if (!user) {
     return <div>      

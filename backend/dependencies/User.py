@@ -46,13 +46,12 @@ class User():
     
     def getBalance(self, username):
         get_balance_command = f"""
-        SELECT balance
-        FROM User
-        WHERE username = "{username}"
+            SELECT balance
+            FROM User
+            WHERE username = "{username}"
         """
         self.cursor.execute(get_balance_command)
         result = self.cursor.fetchall()
-        print(result)
         return ( result[0][0] )
     
     def setBalance(self, username, new_balance):

@@ -55,6 +55,23 @@ class Restaurant():
         self.conn.commit()
         return True
 
+
+    def getRestaurantNameById(self, restaurant_id):
+        """
+            restaurant_id: int, identificador único do restaurante
+
+            returns: string, nome do restaurante
+        """
+        get_menu_command = f"""
+            SELECT restaurant_name
+            FROM Restaurant
+            WHERE restaurant_id == {restaurant_id}
+        """
+
+        self.cursor.execute(get_menu_command)
+
+        return self.cursor.fetchall()[0][0]
+
     def getMenu(self, restaurant_name, day, meal_period):
         """
         restaurant_name: String com o nome do restaurante.\n
