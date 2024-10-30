@@ -32,6 +32,13 @@ export const StatementContainer = styled.div`
       filter: brightness(0.9);
     }
   }
+  .spend {
+    color: var(--red);
+  }
+
+  .received {
+    color: var(--green);
+  }
 `;
 
 export const HeaderContainer = styled.div`

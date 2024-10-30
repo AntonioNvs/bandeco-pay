@@ -2,14 +2,13 @@ import React from 'react';
 import { StatementContainer, HeaderContainer, Modal, ModalContent } from './style';
 import { useEffect, useState } from 'react';
 
-
-
-
+import axios from 'axios'
 
 interface Compra {
-  data: string;
-  valor: string;
-  descricao: string;
+  date: string;
+  value: number;
+  description: string;
+  type: 'spend' | 'received'
 }
 
 const formatCurrency = (value: number) => {
@@ -20,31 +19,43 @@ const formatCurrency = (value: number) => {
 };
 
 interface StatementProps {
+  token: string
   onBackToDashboard: () => void; // Função para voltar ao dashboard
 }
 
-export const Statement: React.FC<StatementProps> = ({ onBackToDashboard }) => {
+export const Statement: React.FC<StatementProps> = ({ token, onBackToDashboard }) => {
   const [compras, setCompras] = useState<Compra[]>([]); // Estado para armazenar as compras
   const [modalVisible, setModalVisible] = useState(false);
-  const [newBalance, setNewBalance] = useState('');
+  const [newBalance, setNewBalance] = useState(0);
 
   // Simula uma "API" que traz os dados das compras após 2 segundos
   useEffect(() => {
-    const fakeApiCall = () => {
-      const comprasSimuladas: Compra[] = [
-        { data: '10/10/2024', valor: '- R$ 10,50', descricao: 'Compra no Bandeco' },
-        { data: '09/10/2024', valor: '+ R$ 50,00', descricao: 'Depósito' },
-        { data: '08/10/2024', valor: '- R$ 20,00', descricao: 'Compra de Livros' },
-        { data: '07/10/2024', valor: '- R$ 15,00', descricao: 'Compra de Material' },
-      ];
-      return comprasSimuladas;
-    };
+    axios.get('http://127.0.0.1:5000/history', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    }).then((response) => {
+      if(response.data.transactions) {
+        setCompras(response.data.transactions)
+      }
+    })
 
-    // Simula o comportamento de delay de uma API
-    setTimeout(() => {
-      const compras = fakeApiCall();
-      setCompras(compras); // Atualiza o estado com os dados simulados
-    }, 1000); // 2 segundos de delay para simular uma API
+    // const fakeApiCall = () => {
+    //   const comprasSimuladas: Compra[] = [
+    //     { data: '10/10/2024', valor: '- R$ 10,50', descricao: 'Compra no Bandeco' },
+    //     { data: '09/10/2024', valor: '+ R$ 50,00', descricao: 'Depósito' },
+    //     { data: '08/10/2024', valor: '- R$ 20,00', descricao: 'Compra de Livros' },
+    //     { data: '07/10/2024', valor: '- R$ 15,00', descricao: 'Compra de Material' },
+    //   ];
+    //   return comprasSimuladas;
+    // };
+
+    // // Simula o comportamento de delay de uma API
+    // setTimeout(() => {
+    //   const compras = fakeApiCall();
+    //   setCompras(compras); // Atualiza o estado com os dados simulados
+    // }, 1000); // 2 segundos de delay para simular uma API
   }, []);
 
   // Função para abrir o modal
@@ -56,16 +67,17 @@ export const Statement: React.FC<StatementProps> = ({ onBackToDashboard }) => {
   const handleCloseModal = () => {
     
     setModalVisible(false);
-    setNewBalance('');
+    setNewBalance(0);
   };
 
   const handleAddBalance = () => {
     if (newBalance) {
-      const valorFormatado = formatCurrency(parseFloat(newBalance)); // Formatar o valor como moeda
+      // const valorFormatado = formatCurrency(parseFloat(newBalance)); // Formatar o valor como moeda
       const novaCompra: Compra = {
-        data: new Date().toLocaleDateString(),
-        valor: valorFormatado,  // Usar valor formatado
-        descricao: 'Depósito',
+        date: new Date().toLocaleDateString(),
+        value: newBalance,  // Usar valor formatado
+        description: 'Depósito',
+        type: 'received'
       };
       setCompras([...compras, novaCompra]);
       handleCloseModal(); // Fechar modal após adicionar saldo
@@ -96,9 +108,11 @@ export const Statement: React.FC<StatementProps> = ({ onBackToDashboard }) => {
             ) : (
               compras.map((compra, index) => (
                 <tr key={index}>
-                  <td>{compra.data}</td>
-                  <td>{compra.descricao}</td>
-                  <td>{compra.valor}</td>
+                  <td className={compra.type === "spend" ? "spend" : "received"}>{compra.date}</td>
+                  <td className={compra.type === "spend" ? "spend" : "received"}>{compra.description}</td>
+                  <td className={compra.type === "spend" ? "spend" : "received"}>
+                    {formatCurrency(compra.value)}
+                  </td>
                 </tr>
               ))
             )}
@@ -115,7 +129,7 @@ export const Statement: React.FC<StatementProps> = ({ onBackToDashboard }) => {
           <input
             type="number"
             value={newBalance}
-            onChange={(e) => setNewBalance(e.target.value)}
+            onChange={(e) => setNewBalance(Number(e.target.value))}
             placeholder="Digite o valor"
           />
           <br />

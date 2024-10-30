@@ -37,7 +37,6 @@ class User {
     return true;
   }
 }
-const user = new User('João', 1500.5, 200.0);
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -75,6 +74,10 @@ function App() {
     setToken(token);
   }
 
+  useEffect(() => {
+    
+  }, [])
+
   return (
     <>
       <Header 
@@ -91,14 +94,13 @@ function App() {
         ) : (
           <div>
             <Account token={token} /> {/* Podemos buscar na api */}
-            <Statement onBackToDashboard={handleViewDashboard} /> {/* Exibe o extrato*/}
+            <Statement token={token} onBackToDashboard={handleViewDashboard} /> {/* Exibe o extrato*/}
           </div>
         )
       ) : (
         <Dashboard />
       )}
       
-
       <LoginModal isOpen={isLoginOpen} onClose={toggleLoginModal} onLoginSuccess={handleLoginSuccess} setToken={handleToken} />
       <GlobalStyle />
     </>
