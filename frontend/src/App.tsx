@@ -51,15 +51,17 @@ function App() {
     setIsLoginOpen(!isLoginOpen);
   };
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (loginToken: string) => {
     setIsAuthenticated(true);
     localStorage.setItem('isAuthenticated', 'true');
+    localStorage.setItem('token', loginToken)
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setToken('');
     localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('token')
   };
 
   const handleViewStatement = () => {
@@ -70,12 +72,18 @@ function App() {
     setCurrentView('dashboard'); // Volta para o dashboard
   };
 
-  const handleToken = (token: string) => {
+  const handleToken = (loginToken: string) => {
     setToken(token);
   }
 
   useEffect(() => {
-    
+    const tokenStorage = localStorage.getItem('token')
+    const isAuthenticatedStorage = localStorage.getItem('isAuthenticated')
+
+    if(isAuthenticatedStorage && tokenStorage) {
+      setToken(tokenStorage)
+      setIsAuthenticated(true)
+    }
   }, [])
 
   return (

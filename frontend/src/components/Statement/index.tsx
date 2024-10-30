@@ -26,7 +26,7 @@ interface StatementProps {
 export const Statement: React.FC<StatementProps> = ({ token, onBackToDashboard }) => {
   const [compras, setCompras] = useState<Compra[]>([]); // Estado para armazenar as compras
   const [modalVisible, setModalVisible] = useState(false);
-  const [newBalance, setNewBalance] = useState(0);
+  const [newBalance, setNewBalance] = useState('');
 
   // Simula uma "API" que traz os dados das compras após 2 segundos
   useEffect(() => {
@@ -67,15 +67,27 @@ export const Statement: React.FC<StatementProps> = ({ token, onBackToDashboard }
   const handleCloseModal = () => {
     
     setModalVisible(false);
-    setNewBalance(0);
+    setNewBalance('');
   };
 
   const handleAddBalance = () => {
     if (newBalance) {
+
+      axios.post('http://127.0.0.1:5000/add_balance', {
+        value: Number(newBalance)
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }).then((response) => {
+        console.log(response.data)
+      })
+
       // const valorFormatado = formatCurrency(parseFloat(newBalance)); // Formatar o valor como moeda
       const novaCompra: Compra = {
         date: new Date().toLocaleDateString(),
-        value: newBalance,  // Usar valor formatado
+        value: Number(newBalance),  // Usar valor formatado
         description: 'Depósito',
         type: 'received'
       };
@@ -129,7 +141,7 @@ export const Statement: React.FC<StatementProps> = ({ token, onBackToDashboard }
           <input
             type="number"
             value={newBalance}
-            onChange={(e) => setNewBalance(Number(e.target.value))}
+            onChange={(e) => setNewBalance(e.target.value)}
             placeholder="Digite o valor"
           />
           <br />

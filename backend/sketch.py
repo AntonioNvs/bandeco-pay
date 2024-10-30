@@ -87,7 +87,7 @@ cursor.execute(menu_table_command)
 
 transaction_table_command = """CREATE TABLE IF NOT EXISTS
 Traction(
-    transaction_id INTEGER PRIMARY KEY,
+    transaction_id AUTOINCREMENT INTEGER PRIMARY KEY,
     transaction_type TEXT,
     transaction_value FLOAT,
     transaction_date DATE,

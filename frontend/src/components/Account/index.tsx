@@ -16,7 +16,6 @@ interface User {
 
 const fetchUserData = async (token: string) => {
   try {
-    console.log(token)
     const responseBalance = await axios.get('http://127.0.0.1:5000/balance', {
       headers: {
         'Authorization': `Bearer ${token}`,

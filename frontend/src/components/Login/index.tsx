@@ -6,8 +6,8 @@ import axios from 'axios';
 interface LoginModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onLoginSuccess: () => void; // Nova prop para chamar quando o login for bem-sucedido
-    setToken: (token: string) => void;
+    onLoginSuccess: (loginToken: string) => void; // Nova prop para chamar quando o login for bem-sucedido
+    setToken: (loginToken: string) => void;
   }
   
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess, setToken }) => {
@@ -32,7 +32,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
             //console.log(response.data);
             setToken(response.data.access_token);
             setError('');
-            onLoginSuccess();  
+            onLoginSuccess(response.data.access_token);  
             onClose();
           } else {
             // Não logado, deu erro

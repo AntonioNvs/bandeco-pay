@@ -28,7 +28,6 @@ export function Dashboard() {
                     fetchedMenus[restaurant] = ["Menu não disponível"];
                 }
             }
-            console.log(fetchedMenus)
             setMenus(fetchedMenus);
         }
 

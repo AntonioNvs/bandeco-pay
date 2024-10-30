@@ -86,15 +86,22 @@ def get_balance_of_user():
     }), 200
 
 
-@app.route("/add_balance", methods=["PUT"])
-@jwt_required
+@app.route("/add_balance", methods=["GET"])
+# @jwt_required(False)
 def add_balance_of_user():
-    username = get_jwt_identity()
-    balance_to_be_add = request.form.get("value")
+    # username = get_jwt_identity()
+    # balance_to_be_add = request.json.get("value")
 
-    raise NotImplementedError("The connection with database will be implemented yet.")
+    database.insertNewTransaction(
+        type="received",
+        value=10,
+        transaction_date=datetime.today().strftime('%Y-%m-%d'),
+        username="antonio.caetano",
+        restaurant_name="none"
+    )
 
-    return jsonify(logged_in_as=username), 200 
+    return jsonify({}), 200 
+
 
 @app.route("/subtract_balance", methods=["PUT"])
 def subtract_balance_of_user():

@@ -6,16 +6,16 @@ class Transaction():
     def __init__(self, conn, cursor):
         self.conn = conn
         self.cursor = cursor
-        self.create_transaction_command = f"""CREATE TABLE IF NOT EXISTS
-            Transaction(
-                transaction_id AUTOINCREMENT INTEGER PRIMARY KEY,
-                type TEXT,
-                value FLOAT,
-                transaction_date DATE,
-                restaurant_id INTEGER,
-                username TEXT,
-                FOREIGN KEY(username) REFERENCES User(username),
-                FOREIGN KEY(restaurant_id) REFERENCES Restaurant(restaurant_id)
+        self.create_transaction_command = """CREATE TABLE IF NOT EXISTS
+        Traction(
+            transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            transaction_type TEXT,
+            transaction_value FLOAT,
+            transaction_date DATE,
+            username TEXT,
+            card_id TEXT,
+            FOREIGN KEY(username) REFERENCES User(username),
+            FOREIGN KEY(card_id) REFERENCES Card(card_id)
             );
         """
         self.cursor.execute(self.create_transaction_command)
@@ -30,21 +30,18 @@ class Transaction():
         restaurant_name: String contendo o nome do restaurante no qual a transação foi efetuada. Pode ser nulo. (String "" por padrão.)\n
         """
         #recuperar o id do usuario.
-        retrieve_restaurant_id = f"""
-        SELECT restaurant_id
-        FROM Restaurant
-        WHERE restaurant_name = "{restaurant_name}"
-        """
-        fetch_command = self.cursor.execute(retrieve_restaurant_id).fetchall()
-        restaurant_id = 0
-
-        if (not (fetch_command == [])):
-            restaurant_id = fetch_command[0][0]
-            
+        # retrieve_restaurant_id = f"""
+        #     SELECT restaurant_id
+        #     FROM Restaurant
+        #     WHERE restaurant_name = "{restaurant_name}"
+        # """
+        # fetch_command = self.cursor.execute(retrieve_restaurant_id).fetchall()
+        
         insert_transaction_command = f"""
-        INSERT INTO Transaction
-        VALUES ("{type}", {value}, {transaction_date}, {restaurant_id}, "{username}")
+            INSERT INTO Traction (transaction_type, transaction_value, transaction_date, username, card_id)
+            VALUES ("{type}", {value}, {transaction_date}, "{username}", 0)
         """
+        
         self.cursor.execute(insert_transaction_command)
         self.conn.commit()
         return True
@@ -57,8 +54,8 @@ class Transaction():
         """
         retrieve_usertransaction_command = f"""
         SELECT *
-        FROM Transactions
-        SORT BY Transactions.transaction_date
+        FROM Traction
+        SORT BY Traction.transaction_date
         WHERE username = "{username}"
         """
         return self.cursor.execute(retrieve_usertransaction_command)
