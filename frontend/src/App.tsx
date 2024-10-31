@@ -6,114 +6,58 @@ import { Account } from './components/Account';
 import { LoginModal } from './components/Login';
 import { GlobalStyle } from './styles/global';
 
-import axios from 'axios';
-
-class User {
-  private name: string;
-  private balance: number;
-  private price_to_pay: number;
- 
-  constructor(name: string, balance: number, price_to_pay: number) {
-    this.name = name;
-    this.balance = balance;
-    this.price_to_pay = price_to_pay;
-  }
-
-  getName(): string {
-    return this.name;
-  }
-
-  getBalance(): number {
-    return this.balance;
-  }
-
-  getPriceToPay(): number {
-    return this.price_to_pay;
-  }
-
-  setBalance(price: number): boolean {
-    if (price < 0) return false;
-    this.balance = price;
-    return true;
-  }
+interface AuthState {
+  token: string | null;
 }
 
 function App() {
+  const [auth, setAuth] = useState<AuthState>({ token: localStorage.getItem('token') });
   const [balanceUpdated, setBalanceUpdated] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    () => !!localStorage.getItem('isAuthenticated') // Verifica se está logado ao carregar
-  );
-  const [currentView, setCurrentView] = useState<'dashboard' | 'statement'>('dashboard'); // Controla o conteúdo exibido
+  const [currentView, setCurrentView] = useState<'dashboard' | 'statement'>('dashboard');
 
-  const [token, setToken] = useState('');
-
-  const toggleLoginModal = () => {
-    setIsLoginOpen(!isLoginOpen);
-  };
+  const toggleLoginModal = () => setIsLoginOpen(!isLoginOpen);
 
   const handleLoginSuccess = (loginToken: string) => {
-    setIsAuthenticated(true);
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('token', loginToken)
+    setAuth({ token: loginToken });
+    localStorage.setItem('token', loginToken);
   };
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
-    setToken('');
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('token')
+    setAuth({ token: null });
+    localStorage.removeItem('token');
   };
 
-  const handleViewStatement = () => {
-    setCurrentView('statement'); // Exibe a página de extrato
-  };
-
-  const handleViewDashboard = () => {
-    setCurrentView('dashboard'); // Volta para o dashboard
-  };
-
-  const handleToken = (loginToken: string) => {
-    setToken(token);
-  }
-
-  useEffect(() => {
-    const tokenStorage = localStorage.getItem('token')
-    const isAuthenticatedStorage = localStorage.getItem('isAuthenticated')
-
-    if(isAuthenticatedStorage && tokenStorage) {
-      setToken(tokenStorage)
-      setIsAuthenticated(true)
-    }
-  }, [])
-
+  const handleViewStatement = () => setCurrentView('statement');
+  const handleViewDashboard = () => setCurrentView('dashboard');
   return (
     <>
       <Header 
         onLoginClick={toggleLoginModal} 
         onLogoutClick={handleLogout} 
-        isAuthenticated={isAuthenticated}
-        onViewStatementClick={handleViewStatement} // Função para ver o extrato
+        isAuthenticated={!!auth.token}
+        onViewStatementClick={handleViewStatement}
       />
 
       {/* Exibe conteúdo baseado no estado atual */}
-      {isAuthenticated ? (
+      {auth.token ? (
         currentView === 'dashboard' ? (
           <Dashboard />
         ) : (
           <div>
-            <Account token={token} balanceUpdated={balanceUpdated}/> {/* Podemos buscar na api */}
+            <Account token={auth.token} balanceUpdated={balanceUpdated}/>
             <Statement 
-              token={token} 
+              token={auth.token} 
               setBalanceUpdated={setBalanceUpdated} 
-              onBackToDashboard={handleViewDashboard} /> {/* Exibe o extrato*/}
+              onBackToDashboard={handleViewDashboard}
+            />
           </div>
         )
       ) : (
         <Dashboard />
       )}
-      
-      <LoginModal isOpen={isLoginOpen} onClose={toggleLoginModal} onLoginSuccess={handleLoginSuccess} setToken={handleToken} />
+
+      <LoginModal isOpen={isLoginOpen} onClose={toggleLoginModal} onLoginSuccess={handleLoginSuccess} />
       <GlobalStyle />
     </>
   );

@@ -7,29 +7,22 @@ interface LoginModalProps {
     isOpen: boolean;
     onClose: () => void;
     onLoginSuccess: (loginToken: string) => void; // Nova prop para chamar quando o login for bem-sucedido
-    setToken: (loginToken: string) => void;
   }
   
-export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess, setToken }) => {
+export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess}) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
-    // Nesse camarada aqui que vamos puxar dados da api...
     const handleLogin = () => {
-      // Simulação de credenciais de login
-      const mockUsername = 'admin';
-      const mockPassword = 'password123';
       
       const loginData = {
         "username": username,
         "password": password
       }
-
       axios.post('http://127.0.0.1:5000/login', loginData)
         .then(response => {
           if (response.status == 200) {
-            setToken(response.data.access_token);
             setError('');
             onLoginSuccess(response.data.access_token);  
             onClose();

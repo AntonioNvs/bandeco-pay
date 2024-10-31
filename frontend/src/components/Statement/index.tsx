@@ -1,144 +1,126 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatementContainer, HeaderContainer, Modal, ModalContent } from './style';
-import { useEffect, useState } from 'react';
-
-import axios from 'axios'
+import axios from 'axios';
 
 interface Compra {
   date: string;
   value: number;
   description: string;
-  type: 'debit' | 'credit'
+  type: 'debit' | 'credit';
 }
-
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('pt-BR', { 
-    style: 'currency', 
-    currency: 'BRL' 
-  }).format(value);
-};
 
 interface StatementProps {
-  token: string
-  onBackToDashboard: () => void; // Função para voltar ao dashboard
-  setBalanceUpdated: React.Dispatch<React.SetStateAction<boolean>>
+  token: string;
+  onBackToDashboard: () => void;
+  setBalanceUpdated: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+const formatCurrency = (value: number) => new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+}).format(value);
+
 export const Statement: React.FC<StatementProps> = ({ token, onBackToDashboard, setBalanceUpdated }) => {
-  const [compras, setCompras] = useState<Compra[]>([]); // Estado para armazenar as compras
+  const [compras, setCompras] = useState<Compra[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [newBalance, setNewBalance] = useState('');
 
-  // Simula uma "API" que traz os dados das compras após 2 segundos
-  useEffect(() => {
-    handleTransactionsAPI()
-  }, []);
-
-  // Função para chamar a API de transações
-  const handleTransactionsAPI = () => {
-    axios.get('http://127.0.0.1:5000/history', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((response) => {
-      if(response.data.transactions) {
-        setCompras(response.data.transactions)
+  // Fetch de transações da API
+  const fetchTransactions = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:5000/history', {
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+      if (response.data.transactions) {
+        setCompras(response.data.transactions);
+        //console.log('Transações:', response.data.transactions);
       }
-    })
-  }
-
-  // Função para abrir o modal
-  const handleAddBalanceClick = () => {
-    setModalVisible(true);
+    } catch (error) {
+      console.error('Erro ao buscar transações:', error);
+    }
   };
 
-  // Função para fechar o modal
-  const handleCloseModal = () => {
-    
+  // Adicionar saldo
+  const addBalance = async () => {
+    if (!newBalance || Number(newBalance) <= 0) return;
+
+    try {
+      await axios.post(
+        'http://127.0.0.1:5000/add_balance',
+        { value: Number(newBalance), type: 'Pix' },
+        { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+      );
+      await fetchTransactions();
+      setBalanceUpdated((prev) => !prev);
+      closeModal();
+    } catch (error) {
+      console.error('Erro ao adicionar saldo:', error);
+    }
+  };
+
+  // Modal Handlers
+  const openModal = () => setModalVisible(true);
+  const closeModal = () => {
     setModalVisible(false);
     setNewBalance('');
   };
 
-  const handleAddBalance = () => {
-    if (newBalance && Number(newBalance) > 0) {
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
 
-      axios.post('http://127.0.0.1:5000/add_balance', {
-        value: Number(newBalance),
-        type: "Pix"
-        // Adicionar aqui se o tipo da transação foi Pix ou Crédito
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      }).then((response) => {
-        console.log(response.data)
-      })
-
-      setTimeout(() => {
-        handleTransactionsAPI();
-        setBalanceUpdated(l => !l);
-        handleCloseModal(); // Fechar modal após adicionar saldo
-      }, 200);
-
-    }
-  };
-  
 
   return (
     <StatementContainer>
       <HeaderContainer>
         <h2>Seu Extrato</h2>
-        <button onClick={handleAddBalanceClick}>Adicionar saldo</button>
+        <button onClick={openModal}>Adicionar saldo</button>
       </HeaderContainer>
 
-        <table>
-          <thead>
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Descrição</th>
+            <th>Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          {compras.length === 0 ? (
             <tr>
-              <th>Data</th>
-              <th>Descrição</th>
-              <th>Valor</th>
+              <td colSpan={3}>Carregando...</td>
             </tr>
-          </thead>
-          <tbody>
-            {compras.length === 0 ? (
-              <tr>
-                <td colSpan={3}>Carregando...</td>
+          ) : (
+            compras.map((compra, index) => (
+              <tr key={index}>
+                <td className={compra.type}>{compra.date}</td>
+                <td className={compra.type}>{compra.description}</td>
+                <td className={compra.type}>{formatCurrency(compra.value)}</td>
               </tr>
-            ) : (
-              compras.map((compra, index) => (
-                <tr key={index}>
-                  <td className={compra.type === "debit" ? "debit" : "credit"}>{compra.date}</td>
-                  <td className={compra.type === "debit" ? "debit" : "credit"}>{compra.description}</td>
-                  <td className={compra.type === "debit" ? "debit" : "credit"}>
-                    {formatCurrency(compra.value)}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+            ))
+          )}
+        </tbody>
+      </table>
 
       <button onClick={onBackToDashboard}>Voltar ao Dashboard</button>
 
-      {/* Modal para adicionar saldo */}
+      {/* Modal de Adicionar Saldo */}
       {modalVisible && (
-      <Modal onClick={handleCloseModal}> {/* Detecta clique no overlay */}
-        <ModalContent onClick={(e) => e.stopPropagation()}> {/* Não fecha ao clicar dentro */}
-          <h3>Adicionar Saldo</h3>
-          <input
-            type="number"
-            value={newBalance}
-            onChange={(e) => setNewBalance(e.target.value)}
-            placeholder="Digite o valor"
-          />
-          <br />
-          <button onClick={handleAddBalance}>Adicionar</button>
-          <button onClick={handleCloseModal}>Cancelar</button>
-        </ModalContent>
-      </Modal>
-    )}
+        <Modal onClick={closeModal}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <h3>Adicionar Saldo</h3>
+            <input
+              type="number"
+              value={newBalance}
+              onChange={(e) => setNewBalance(e.target.value)}
+              placeholder="Digite o valor"
+            />
+            <br />
+            <button onClick={addBalance}>Adicionar</button>
+            <button onClick={closeModal}>Cancelar</button>
+          </ModalContent>
+        </Modal>
+      )}
     </StatementContainer>
   );
 };
