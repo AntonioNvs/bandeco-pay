@@ -4,8 +4,8 @@ import sqlite3
 from User import User
 
 class Student(User):
-    def __init__(self, conn, cursor):
-        super().__init__(conn, cursor)
+    def __init__(self, conn):
+        super().__init__(conn)
         self.student_table_command =  """CREATE TABLE IF NOT EXISTS
             Student(
                 registration_number INTEGER PRIMARY KEY,  
@@ -14,17 +14,21 @@ class Student(User):
                 FOREIGN KEY(username) REFERENCES User(username)
             );
             """
-        self.cursor.execute(self.student_table_command)
+        cursor = self.conn.cursor()
+        cursor.execute(self.student_table_command)
         self.conn.commit()
-    
+        cursor.close()
+
     def insertNewStudent(self, username, name, password, balance, registration_number, fump_level):
         self.insertNewUser(username, name, password, balance)
         insert_command_for_student = f"""
         INSERT INTO Student
         VALUES ({registration_number}, {fump_level}, "{username}")
         """
-        self.cursor.execute(insert_command_for_student)
+        cursor = self.conn.cursor()
+        cursor.execute(insert_command_for_student)
         self.conn.commit()
+        cursor.close()
         return True
 
     def getFumpLevel(self, username):
@@ -33,8 +37,12 @@ class Student(User):
         FROM Student
         WHERE user_id = {username}
         """
-        self.cursor.execute(get_fumplevel_command)
-        return ( self.cursor.fetchall() )[0][0]
+        cursor = self.conn.cursor()
+        cursor.execute(get_fumplevel_command)
+        result = cursor.fetchall()[0][0]
+        cursor.close()
+
+        return result
     
     def getAmounttoPay(self, username):
         fump_level = self.getFumpLevel(username)
@@ -57,5 +65,9 @@ class Student(User):
         FROM Student
         WHERE username = {username}
         """
-        self.cursor.execute(get_registration_command)
-        return ( self.cursor.fetchall())[0][0]
+        cursor = self.conn.cursor()
+        cursor.execute(get_registration_command)
+        result = cursor.fetchall()[0][0]
+        cursor.close()
+
+        return result

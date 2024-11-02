@@ -4,8 +4,8 @@ import sqlite3
 from User import User
 
 class Teacher(User):
-    def __init__(self, conn, cursor):
-        super().__init__(conn, cursor)
+    def __init__(self, conn):
+        super().__init__(conn)
         self.teacher_table_command = """CREATE TABLE IF NOT EXISTS
             Teacher(
                 teacher_id INTEGER PRIMARY KEY, 
@@ -13,8 +13,10 @@ class Teacher(User):
                 FOREIGN KEY(username) REFERENCES User(username)
             );
         """
-        self.cursor.execute(self.teacher_table_command)
+        cursor = self.conn.cursor()
+        cursor.execute(self.teacher_table_command)
         self.conn.commit()
+        cursor.close()
 
     def insertNewTeacher(self, username, name, password, balance, teacher_id):
         self.insertNewUser(username=username, name=name, password=password, balance=balance)
@@ -22,8 +24,11 @@ class Teacher(User):
         INSERT INTO Teacher
         VALUES ({teacher_id}, "{username}")
         """
-        self.cursor.execute(insert_teacher_command)
+        cursor = self.conn.cursor()
+        cursor.execute(insert_teacher_command)
         self.conn.commit()
+        cursor.close()
+
         return True
     
     def getTeacherId(self, username):
@@ -32,4 +37,8 @@ class Teacher(User):
         FROM Teacher
         WHERE username = "{username}"
         """
-        return ( self.cursor.execute(get_teacherid_command).fetchall() )[0][0]
+        cursor = self.conn.cursor()
+        result = cursor.execute(get_teacherid_command).fetchall()[0][0]
+        cursor.close()
+        
+        return result

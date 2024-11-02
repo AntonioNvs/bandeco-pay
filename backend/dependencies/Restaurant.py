@@ -3,16 +3,17 @@ sys.path.append("./")
 import sqlite3
 
 class Restaurant():
-    def __init__(self, conn, cursor):
+    def __init__(self, conn):
         self.conn = conn
-        self.cursor = cursor
         self.restaurant_table_command = """CREATE TABLE IF NOT EXISTS
             Restaurant(
             restaurant_id INTEGER PRIMARY KEY,
             restaurant_name TEXT
             );
         """
-        self.cursor.execute(self.restaurant_table_command)
+        cursor = self.conn.cursor()
+        cursor.execute(self.restaurant_table_command)
+        self.conn.commit()
         
         self.menu_table_command = """CREATE TABLE IF NOT EXISTS
             Menu(
@@ -23,9 +24,10 @@ class Restaurant():
             FOREIGN KEY(restaurant_id) REFERENCES Restaurant(restaurant_id)
             );
         """
-        self.cursor.execute(self.menu_table_command)
-        
+
+        cursor.execute(self.menu_table_command)
         self.conn.commit()
+        cursor.close()
 
     def insertRestaurant(self, restaurant_id, restaurant_name):
         """
@@ -36,8 +38,11 @@ class Restaurant():
         INSERT INTO Restaurant
         VALUES ({restaurant_id}, "{restaurant_name}")
         """
-        self.cursor.execute(insert_restaurant_command)
+        cursor = self.conn.cursor()
+        cursor.execute(insert_restaurant_command)
         self.conn.commit()
+        cursor.close()
+
         return True
 
     def insertMenu(self, menu_description, day, meal_period, restaurant_id):
@@ -51,8 +56,11 @@ class Restaurant():
         INSERT INTO Menu
         VALUES ("{menu_description}", {day}, "{meal_period}", {restaurant_id})
         """
-        self.cursor.execute(insert_menu_command)
+        cursor = self.conn.cursor()
+        cursor.execute(insert_menu_command)
         self.conn.commit()
+        cursor.close()
+
         return True
 
 
@@ -68,9 +76,12 @@ class Restaurant():
             WHERE restaurant_id == {restaurant_id}
         """
 
-        self.cursor.execute(get_menu_command)
+        cursor = self.conn.cursor()
+        cursor.execute(get_menu_command)
+        result = cursor.fetchall()[0][0]
+        cursor.close()
 
-        return self.cursor.fetchall()[0][0]
+        return result
 
     def getMenu(self, restaurant_name, day, meal_period):
         """
@@ -79,12 +90,15 @@ class Restaurant():
         meal_period: String (Almoco ou Janta). \n
         """
         get_menu_command = f"""
-        SELECT menu_description
-        FROM 
-            Menu INNER JOIN Restaurant
-            ON Restaurant.restaurant_id = Menu.restaurant_id
-        WHERE Restaurant.restaurant_name = "{restaurant_name}" AND Menu.day = {day} AND Menu.meal_period = "{meal_period}"
+            SELECT menu_description
+            FROM 
+                Menu INNER JOIN Restaurant
+                ON Restaurant.restaurant_id = Menu.restaurant_id
+            WHERE Restaurant.restaurant_name = "{restaurant_name}" AND Menu.day = {day} AND Menu.meal_period = "{meal_period}"
         """
-        return ( self.cursor.execute(get_menu_command).fetchall() )[0][0]
+        cursor = self.conn.cursor()
+        result = cursor.execute(get_menu_command).fetchall()[0][0]
+        cursor.close()
+        return result
         
     

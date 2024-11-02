@@ -2,7 +2,7 @@ import os
 
 from flask_cors import CORS
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, g
 
 from datetime import datetime, timedelta
 
@@ -24,6 +24,12 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 jwt = JWTManager(app)
 
 database = Database("databases/database.db")
+
+@app.teardown_appcontext
+def close_db(error):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -79,7 +85,7 @@ def get_balance_of_user():
     username = get_jwt_identity()
     
     # Busca o saldo do usuário a partir do banco de dados
-    balance = database.getBalance(username) 
+    balance = database.getBalance(username=username)
 
     return jsonify({
         "name": username,
@@ -93,7 +99,7 @@ def add_balance_of_user():
     username = get_jwt_identity()
     balance_to_be_add = request.json.get("value")
     type_ = request.json.get("type")
-
+    
     database.insertNewTransaction(
         type_=type_,
         value=float(balance_to_be_add),

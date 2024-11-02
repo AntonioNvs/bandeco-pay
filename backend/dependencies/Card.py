@@ -3,9 +3,8 @@ sys.path.append("./")
 import sqlite3
 
 class Card():
-    def __init__(self, conn, cursor):
+    def __init__(self, conn):
         self.conn = conn
-        self.cursor = cursor
         card_table_command = """CREATE TABLE IF NOT EXISTS
         Card(
             card_id TEXT PRIMARY KEY,
@@ -13,15 +12,21 @@ class Card():
             FOREIGN KEY(username) REFERENCES User(username)
             );
         """
+        cursor = self.conn.cursor()
         cursor.execute(card_table_command)
+        self.conn.commit()
+        cursor.close()
 
     def insertNewCard(self, card_id, username):
         insert_new_card_command = f"""
             INSERT INTO Card
             VALUES ( "{card_id}", "{username}")
         """
-        self.cursor.execute(insert_new_card_command)
+        cursor = self.conn.cursor()
+        cursor.execute(insert_new_card_command)
         self.conn.commit()
+        cursor.close()
+
         return True
 
     def getOwner(self, card_id):
@@ -33,7 +38,11 @@ class Card():
             FROM Card
             WHERE card_id = "{card_id}"
         """
-        return ( self.cursor.execute(get_owner_command).fetchall() )[0][0]
+        cursor = self.conn.cursor()
+        result = cursor.execute(get_owner_command).fetchall()[0][0]
+        cursor.close()
+
+        return  result
     
 
     def getAll(self):
@@ -41,7 +50,11 @@ class Card():
             SELECT *
             FROM Card
         """
-        return self.cursor.execute(get_All).fetchall()
+        cursor = self.conn.cursor()
+        result = cursor.execute(get_All).fetchall()
+        cursor.close()
+
+        return result
 
     def getCardIdFromUserName(self, username):
         """
@@ -52,5 +65,9 @@ class Card():
             FROM Card
             WHERE username = "{username}"
         """
-        return ( self.cursor.execute(get_username_command).fetchall() )[0][0]
+        cursor = self.conn.cursor()
+        result = cursor.execute(get_username_command).fetchall()[0][0]
+        cursor.close()
+        
+        return result
 

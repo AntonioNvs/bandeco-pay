@@ -4,8 +4,8 @@ import sqlite3
 from User import User
 
 class Employee(User):
-    def __init__(self, conn, cursor):
-        super().__init__(conn, cursor)
+    def __init__(self, conn):
+        super().__init__(conn)
         self.employee_table_command = """CREATE TABLE IF NOT EXISTS
             Employee(
                 employee_id INTEGER PRIMARY KEY, 
@@ -13,8 +13,10 @@ class Employee(User):
                 FOREIGN KEY(username) REFERENCES User(username)
             );
         """
-        self.cursor.execute(self.employee_table_command)
+        cursor = self.conn.cursor()
+        cursor.execute(self.employee_table_command)
         self.conn.commit()
+        cursor.close()
 
     def insertNewEmployee(self, username, name, password, balance, employee_id):
         self.insertNewUser(username=username, name=name, password=password, balance=balance)
@@ -22,8 +24,11 @@ class Employee(User):
         INSERT INTO Employee
         VALUES ({employee_id}, "{username}")
         """
-        self.cursor.execute(insert_employee_command)
+        cursor = self.conn.cursor()
+        cursor.execute(insert_employee_command)
         self.conn.commit()
+        cursor.close()
+
         return True
     
     def getEmployeeId(self, username):
@@ -32,4 +37,8 @@ class Employee(User):
         FROM Employee
         WHERE username = "{username}"
         """
-        return ( self.cursor.execute(get_employeeid_command).fetchall() )[0][0]
+        cursor = self.conn.cursor()
+        result = self.cursor.execute(get_employeeid_command).fetchall()[0][0]
+        cursor.close()
+
+        return result

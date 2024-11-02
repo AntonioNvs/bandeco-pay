@@ -3,9 +3,8 @@ sys.path.append("./")
 import sqlite3
 
 class Transaction():
-    def __init__(self, conn, cursor):
+    def __init__(self, conn):
         self.conn = conn
-        self.cursor = cursor
         self.create_transaction_command = """CREATE TABLE IF NOT EXISTS
         Traction(
             transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,8 +19,10 @@ class Transaction():
             FOREIGN KEY(restaurant_id) REFERENCES Restaurant(restaurant_id)
             );
         """
-        self.cursor.execute(self.create_transaction_command)
+        cursor = self.conn.cursor()
+        cursor.execute(self.create_transaction_command)
         self.conn.commit()
+        cursor.close()
     
     def insertTransaction(self, type_, value, transaction_date, username, card_id, restaurant_id):
         """
@@ -41,11 +42,20 @@ class Transaction():
         
         insert_transaction_command = f"""
             INSERT INTO Traction (transaction_type, transaction_value, transaction_date, username, card_id, restaurant_id)
-            VALUES ("{type_}", {value}, "{transaction_date}", "{username}", "{card_id}", {restaurant_id})
+            VALUES (?, ?, ?, ?, ?, ?)
         """
         
-        self.cursor.execute(insert_transaction_command)
-        self.conn.commit()
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute(insert_transaction_command, (type_, value, transaction_date, username, card_id, restaurant_id))
+            self.conn.commit()  # Commit the transaction after the insert
+        except Exception as e:
+            self.conn.rollback()  # Rollback in case of error
+            print(f"Error occurred: {e}")
+            return False
+        finally:
+            cursor.close()
+
         return True
     
     def retrieveUserTransaction(self, username):
@@ -60,6 +70,9 @@ class Transaction():
             WHERE username = "{username}"
             ORDER BY transaction_date
         """
-        self.cursor.execute(retrieve_usertransaction_command)
+        cursor = self.conn.cursor()
+        cursor.execute(retrieve_usertransaction_command)
+        result = cursor.fetchall()
+        cursor.close()
 
-        return self.cursor.fetchall()
+        return result

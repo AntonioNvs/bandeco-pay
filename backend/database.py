@@ -1,4 +1,6 @@
 import sys
+import time
+
 sys.path.append("./dependencies")
 import sqlite3
 from dependencies.User import User
@@ -31,23 +33,24 @@ Copo Refresco
 
 class Database():
     def __init__(self, database_filename):
-        self.conn = sqlite3.connect(database_filename, check_same_thread=False)
-        self.cursor = self.conn.cursor()
-        self.User_Management = User(conn=self.conn, cursor=self.cursor)
-        self.Student_Management = Student(conn=self.conn, cursor=self.cursor)
-        self.Employee_Management = Employee(conn=self.conn, cursor=self.cursor)
-        self.Teacher_Management = Teacher(conn=self.conn, cursor=self.cursor)
-        self.Restaurant_Management = Restaurant(conn=self.conn, cursor=self.cursor)
-        self.Card_Management = Card(conn=self.conn, cursor=self.cursor)
-        self.Transaction_Management = Transaction(conn=self.conn, cursor=self.cursor)
+        self.conn = sqlite3.connect(database_filename, check_same_thread=False, timeout=5)
+        self.User_Management = User(conn=self.conn)
+        self.Student_Management = Student(conn=self.conn)
+        self.Employee_Management = Employee(conn=self.conn)
+        self.Teacher_Management = Teacher(conn=self.conn)
+        self.Restaurant_Management = Restaurant(conn=self.conn)
+        self.Card_Management = Card(conn=self.conn)
+        self.Transaction_Management = Transaction(conn=self.conn)
 
         self.initializate_database_data()
 
+    def close(self):
+        self.conn.close()
+
     def initializate_database_data(self):
-        try:
-            self.insertNewStudent(username="antonio.caetano", name="Antonio Caetano Neves Neto", password=generate_password_hash("antoniosenha123"), registration_number=2022043555, fump_level=5)
-        except:
-            return
+        if self.User_Management.verifyIfUsernameExists("antonio.caetano"): return
+
+        self.insertNewStudent(username="antonio.caetano", name="Antonio Caetano Neves Neto", password=generate_password_hash("antoniosenha123"), registration_number=2022043555, fump_level=5)
         
         self.insertNewStudent(username="raphael.mendes", name="Raphael A. Carreiro Mendes", password=generate_password_hash("raphaelsenha123"), registration_number=2022043556, fump_level=4)
         self.insertNewStudent(username="bernardo.dutra", name="Bernardo Dutra Lemos", password=generate_password_hash("bdlemossenha123"), registration_number=2022043557, fump_level=2)
@@ -60,9 +63,9 @@ class Database():
         self.insertRestaurant(restaurant_id=5, restaurant_name="Campus ICA")
 
         for date in ["2024-10-29", "2024-10-30", "2024-10-31", "2024-11-01", "2024-11-02"]:
-            for restaurant_name in ["Pampulha 1", "Pampulha 2", "Campus Saúde", "Campus Direito", "Campus ICA"]:
-                self.insertMenu(lunch, date, "Almoco", restaurant_name)
-                self.insertMenu(lunch, date, "Janta", restaurant_name)
+            for j, restaurant_name in enumerate(["Pampulha 1", "Pampulha 2", "Campus Saúde", "Campus Direito", "Campus ICA"]):
+                self.insertMenu(lunch, date, "Almoco", restaurant_name, j+1)
+                self.insertMenu(lunch, date, "Janta", restaurant_name, j+1)
 
         self.insertNewCard(card_id="7CA288BD", username="antonio.caetano")
         self.insertNewCard(card_id="64090D64", username="raphael.mendes")
@@ -141,7 +144,7 @@ class Database():
     
     def insertNewTransaction(self, type_, value, transaction_date, username, restaurant_id=1):
         card_id = self.Card_Management.getCardIdFromUserName(username=username)
-        
+
         result = self.Transaction_Management.insertTransaction(
             type_=type_, 
             value=value, 
@@ -256,7 +259,7 @@ class Database():
             return True
         return False
         
-    def insertMenu(self, menu_description, day, meal_period, restaurant_name):
+    def insertMenu(self, menu_description, day, meal_period, restaurant_name, restaurant_id):
         """
         menu_description: String contendo toda a alimentação do dia. \n
         day: Data em formato aaaa-mm-dd \n
@@ -268,7 +271,6 @@ class Database():
         FROM Restaurant
         WHERE restaurant_name = "{restaurant_name}"
         """
-        restaurant_id = self.cursor.execute(get_id_command).fetchall()[0][0]
         res = self.Restaurant_Management.insertMenu(menu_description=menu_description, day=day, meal_period=meal_period, restaurant_id=restaurant_id)
         if res:
             return True
