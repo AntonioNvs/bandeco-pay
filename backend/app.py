@@ -18,6 +18,8 @@ load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
+
+app.config["DEBUG"] = os.environ.get("FLASK_DEBUG")
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 
@@ -30,6 +32,12 @@ def close_db(error):
     db = g.pop('db', None)
     if db is not None:
         db.close()
+
+@app.route('/hello_world', methods=['GET'])
+def hello_world():
+    return jsonify({
+        "msg": "Hello Ione!"
+    })
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -118,14 +126,44 @@ def add_balance_of_user():
     }), 200 
 
 
-@app.route("/subtract_balance", methods=["PUT"])
+@app.route("/subtract_balance", methods=["POST"])
 def subtract_balance_of_user():
-    card_id = request.form.get("card_id")
-    balance_to_be_subtract = request.form.get("value")
+    card_id = request.json.get("cardId")
 
-    raise NotImplementedError("The connection with database will be implemented yet.")
+    username = database.getOwner(card_id)
 
-    return jsonify(logged_in_as=username), 200 
+    ammount_to_pay = database.getAmounttoPay(username=username)
+
+    balance = database.getBalance(username)
+
+    name = database.getUserName(username)
+
+    if balance < ammount_to_pay:
+        return jsonify({
+            "msg": "no balance enough",
+            "name": name,
+            "balance": balance
+        }), 200
+
+    database.insertNewTransaction(
+        type_="debit",
+        value=-ammount_to_pay,
+        transaction_date=datetime.today().strftime('%Y-%m-%d'),
+        username=username,
+        restaurant_id=1
+    )
+
+    database.addBalance(
+        username=username,
+        value_to_add=-ammount_to_pay
+    )
+
+    return jsonify({
+        "msg": "succedd",
+        "name": name,
+        "value_used": ammount_to_pay,
+        "balance": balance - ammount_to_pay
+    }), 200 
 
 @app.route("/history", methods=["GET"])
 @jwt_required(False)
@@ -151,8 +189,8 @@ def get_history_of_transactions():
 
 
     return jsonify({
-        "transactions": rows
+        "transactions": rows[::-1]
     }), 200
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=True)

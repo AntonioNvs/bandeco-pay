@@ -62,7 +62,7 @@ class Database():
         self.insertRestaurant(restaurant_id=4, restaurant_name="Campus Direito")
         self.insertRestaurant(restaurant_id=5, restaurant_name="Campus ICA")
 
-        for date in ["2024-10-29", "2024-10-30", "2024-10-31", "2024-11-01", "2024-11-02"]:
+        for date in ["2024-11-03", "2024-11-04", "2024-11-05", "2024-11-06", "2024-11-07", "2024-11-08", "2024-11-09"]:
             for j, restaurant_name in enumerate(["Pampulha 1", "Pampulha 2", "Campus Saúde", "Campus Direito", "Campus ICA"]):
                 self.insertMenu(lunch, date, "Almoco", restaurant_name, j+1)
                 self.insertMenu(lunch, date, "Janta", restaurant_name, j+1)
@@ -234,7 +234,9 @@ class Database():
         FROM Student
         WHERE username = "{username}"
         """
-        result = self.cursor.execute(command_for_student).fetchall()
+        cursor = self.conn.cursor()
+        result = cursor.execute(command_for_student).fetchall()
+        cursor.close()
         if (not (isnull(result)) ): #alunos dependem do seu nivel de fump
             return self.Student_Management.getAmounttoPay(username=username)
         else:
@@ -243,7 +245,9 @@ class Database():
             FROM Employee
             WHERE username = "{username}"
             """
-            result = self.cursor.execute(command_for_employee).fetchall()
+            cursor = self.conn.cursor()
+            result = cursor.execute(command_for_employee).fetchall()
+            cursor.close()
             if (not (isnull(result)) ): #empregados paga 8.50
                 return 8.50
         #o usuario nao eh aluno nem empregado

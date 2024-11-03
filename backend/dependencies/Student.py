@@ -33,9 +33,9 @@ class Student(User):
 
     def getFumpLevel(self, username):
         get_fumplevel_command = f"""
-        SELECT fump_level
-        FROM Student
-        WHERE user_id = {username}
+            SELECT fump_level
+            FROM Student
+            WHERE username = "{username}"
         """
         cursor = self.conn.cursor()
         cursor.execute(get_fumplevel_command)
