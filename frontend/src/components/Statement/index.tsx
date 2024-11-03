@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StatementContainer, HeaderContainer, Modal, ModalContent } from './style';
+import { StatementContainer, HeaderContainer, Modal, ModalContent, ButtonsContainer  } from './style';
 import axios from 'axios';
 
 interface Compra {
@@ -24,11 +24,12 @@ export const Statement: React.FC<StatementProps> = ({ token, onBackToDashboard, 
   const [compras, setCompras] = useState<Compra[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [newBalance, setNewBalance] = useState('');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('Pix');
 
   // Fetch de transações da API
   const fetchTransactions = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:5000/history', {
+      const response = await axios.get('https://test-41378101111.southamerica-east1.run.app/history', {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
       if (response.data.transactions) {
@@ -46,8 +47,8 @@ export const Statement: React.FC<StatementProps> = ({ token, onBackToDashboard, 
 
     try {
       await axios.post(
-        'http://127.0.0.1:5000/add_balance',
-        { value: Number(newBalance), type: 'Pix' },
+        'https://test-41378101111.southamerica-east1.run.app/add_balance',
+        { value: Number(newBalance), type: selectedPaymentMethod },
         { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
       );
       await fetchTransactions();
@@ -69,6 +70,9 @@ export const Statement: React.FC<StatementProps> = ({ token, onBackToDashboard, 
     fetchTransactions();
   }, []);
 
+  const handlePaymentMethodSelect = (method: string) => {
+    setSelectedPaymentMethod(method); // Set selected payment method
+  };
 
   return (
     <StatementContainer>
@@ -109,6 +113,18 @@ export const Statement: React.FC<StatementProps> = ({ token, onBackToDashboard, 
         <Modal onClick={closeModal}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <h3>Adicionar Saldo</h3>
+            <ButtonsContainer >
+              <button 
+                onClick={() => handlePaymentMethodSelect('Pix')} 
+                style={{ backgroundColor: selectedPaymentMethod === 'Pix' ? '#33cc95' : '#ccc' }}>
+                Pix
+              </button>
+              <button 
+                onClick={() => handlePaymentMethodSelect('Crédito')} 
+                style={{ backgroundColor: selectedPaymentMethod === 'Crédito' ? '#33cc95' : '#ccc' }}>
+                Crédito
+              </button>
+            </ButtonsContainer >
             <input
               type="number"
               value={newBalance}

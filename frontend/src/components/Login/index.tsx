@@ -20,7 +20,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
         "username": username,
         "password": password
       }
-      axios.post('http://127.0.0.1:5000/login', loginData)
+      axios.post('https://test-41378101111.southamerica-east1.run.app/login', loginData)
         .then(response => {
           if (response.status == 200) {
             setError('');

@@ -17,6 +17,7 @@ export const StatementContainer = styled.div`
   th, td {
     padding: 12px;
     text-align: left;
+    font-size: 20px;
   }
   th {
     background-color: #f4f4f4;
@@ -83,14 +84,52 @@ export const ModalContent = styled.div`
   border-radius: 8px;
   width: 400px;
   text-align: center;
+
+  h3 {
+    font-size: 24px;
+  }
+
   input {
     padding: 10px;
     margin-top: 10px;
-    margin-bottom: 20px;
-    width: 80%;
+    margin-bottom: 32px;
+    width: 90%;
+    border-radius: 8px;
+    font-size: 20px;
   }
   button {
     padding: 10px 20px;
     margin-right: 10px;
+  }
+`;
+
+export const ButtonsContainer = styled.div`
+  display: flex;
+  justify-content: space-between; /* Align buttons side by side */
+  margin-bottom: 24px; /* Space below the button container */
+  margin-top: 24px;
+
+  button {
+    flex: 1; /* Make buttons take equal space */
+    margin-right: 5px; /* Space between buttons */
+    background-color: var(--green);
+    color: white; /* Text color */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 10px; /* Padding inside the button */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Smooth transition for background color */
+
+    &:hover {
+      background-color: darkgreen; /* Darker green on hover */
+    }
+
+    &:last-child {
+      margin-right: 0; /* Remove margin from the last button */
+    }
+
+    &.selected {
+      background-color: var(--dark-green); /* Change background for selected button */
+    }
   }
 `;

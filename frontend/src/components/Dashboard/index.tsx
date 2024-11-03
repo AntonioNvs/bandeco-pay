@@ -19,8 +19,11 @@ export function Dashboard() {
             const fetchedMenus: MenusType = {};
             for (const restaurant of restaurantNames) {
                 try {
-                    const response = await axios.get('http://127.0.0.1:5000/menu', {
-                        params: { restaurant_name: restaurant, meal_period: mealPeriod },
+                    const response = await axios.get('https://test-41378101111.southamerica-east1.run.app/menu', {
+                        params: { 
+                            restaurant_name: restaurant, 
+                            meal_period: mealPeriod
+                        },
                     });
                     fetchedMenus[restaurant] = response.data.menu;
                 } catch (error) {

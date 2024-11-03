@@ -16,14 +16,14 @@ interface User {
 
 const fetchUserData = async (token: string) => {
   try {
-    const responseBalance = await axios.get('http://127.0.0.1:5000/balance', {
+    const responseBalance = await axios.get('https://test-41378101111.southamerica-east1.run.app/balance', {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
 
-    const responseName = await axios.get('http://127.0.0.1:5000/get_user_name', {
+    const responseName = await axios.get('https://test-41378101111.southamerica-east1.run.app/get_user_name', {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
