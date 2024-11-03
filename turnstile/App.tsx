@@ -2,12 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { Image, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import NfcManager, { NfcTech } from 'react-native-nfc-manager';
 
+import axios from 'axios'
+
 NfcManager.start();
 
 const App = () => {
   const [nfcTag, setNfcTag] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isNfcActive, setIsNfcActive] = useState(false);
+  const [balance, setBalance] = useState(0)
+  const [ammountPaid, setAmmountPaid] = useState(0)
+  const [error, setError] = useState(false)
+  const [name, setName] = useState("")
 
   const raphinhaId = "64090D64"
   const bernardoId = "8E87EE9C"
@@ -21,6 +27,8 @@ const App = () => {
       await NfcManager.requestTechnology(NfcTech.Ndef);
       const tag = await NfcManager.getTag();
       setNfcTag(tag);
+      await handlePostOfTransaction(tag["id"])
+
       setLoading(false); // Finaliza o loading
       setIsNfcActive(true);
       console.log(tag)
@@ -41,13 +49,37 @@ const App = () => {
     }
   };
 
+  function roundToTwoDecimals(value: number): number {
+    return Math.round(value * 100) / 100;
+  }
+
+  const handlePostOfTransaction = async (cardId: string) => {
+    const response = await axios.post('https://test-41378101111.southamerica-east1.run.app/subtract_balance', {
+      cardId: cardId
+    })
+
+    const data = response.data
+
+    setBalance(parseFloat(roundToTwoDecimals(data.balance)))
+    setName(data.name.toUpperCase());
+    
+    if (data.msg == "succedd") {
+      setAmmountPaid(data.value_used)
+      setError(false)
+    } else {
+      setError(true)
+    }
+
+    console.log(data)
+  }
+
   useEffect(() => {
     // Ativa a leitura de NFC automaticamente ao carregar a tela
     startNfcReading();
-
+ 
     // Limpa o listener de NFC ao desmontar o componente
     return () => {
-      NfcManager.setEventListener(NfcTech.Ndef, null);
+      NfcManager.setEventListener(NfcTech.Ndef, null); 
     };
   }, []);
 
@@ -63,18 +95,21 @@ const App = () => {
   return (
     <View style={[
         styles.containerPersonalData,
-        nfcTag?.id == raphinhaId ? {backgroundColor: "#e52e4d"} : {backgroundColor: "#33cc95"}
+        error ? {backgroundColor: "#e52e4d"} : {backgroundColor: "#33cc95"}
       ]}>
       <Image 
         style={styles.img}
-        source={nfcTag?.id == raphinhaId ? require("./assets/error.png") : require("./assets/check_circle.png")}></Image>        
-      <Text style={styles.titlePersonalData}>{nfcTag?.id == raphinhaId ? "SALDO INDISPONÍVEL" : "TRANSAÇÃO OCORRIDA"}</Text>
-      <Text style={styles.textSubtype}>{nfcTag?.id == raphinhaId ? "RAPHAEL AROLDO CARREIRO MENDES" : "ANTÔNIO CAETANO NEVES NETO"}</Text>
+        source={error ? require("./assets/error.png") : require("./assets/check_circle.png")}></Image>        
+      <Text style={styles.titlePersonalData}>{error ? "SALDO INDISPONÍVEL" : "TRANSAÇÃO OCORRIDA"}</Text>
+      <Text style={styles.textSubtype}>{name}</Text>
+      {!error ?
+        <Text style={styles.textSubtype}>
+          SALDO USADO: <Text style={styles.textData}>R$ {ammountPaid}</Text>
+        </Text> : <></>
+      }
+
       <Text style={styles.textSubtype}>
-        SALDO USADO: <Text style={styles.textData}>R$ 5,60</Text>
-      </Text>
-      <Text style={styles.textSubtype}>
-        SALDO RESTANTE: <Text style={styles.textData}>{nfcTag?.id == raphinhaId ? "R$ 1,70" : "R$ 45,60"}</Text>
+        SALDO RESTANTE: <Text style={styles.textData}>R$ {balance}</Text>
       </Text>
     </View>
   );
