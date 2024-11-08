@@ -64,3 +64,15 @@ O sistema de pagamento automático para restaurantes universitários será desen
     - Implementar no backend a lógica de retornar o cardápio do dia [Antônio]
     - Adaptar na tela principal a visualização do cardápio do dia [Bernardo]
 
+## Diagramas UML
+
+### Diagrama de Classes
+
+![Diagrama de classes UML](/UML/Diagrama-de-Classes.png)
+
+
+### Diagrama de Sequência
+
+![Diagrama de Sequência UML](/UML/diagrama-de-sequência.jpeg)
+
+
