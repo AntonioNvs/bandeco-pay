@@ -15,7 +15,7 @@ O sistema de pagamento automático para restaurantes universitários será desen
 
 - **História 1:** Como usuário, gostaria de gerenciar meus cartões disponíveis (bloquear uso, liberar uso, remover, etc).
 
-- **História 2:** Como usuário, gostaria de ter acesso a um extrato da conta, dividido mensalmente, contendo todos os depósitos e gastos.
+- **História 2:** Como usuário, gostaria de ter acesso a um extrato da conta, contendo todos os depósitos e gastos.
 
 - **História 3:** Como usuário, gostaria de acessar o sistema utilizando o login cadastrado da UFMG.
 
@@ -31,12 +31,12 @@ O sistema de pagamento automático para restaurantes universitários será desen
 
 - **História 9:** Como usuário, gostaria de pagar minha refeição e possibilitar minha entrada no restaurante universitário com o meu cartão da UFMG.
 
-- **História 10:** Como usuário, gostaria de ver qual é o cardápio do dia de cada restaurante e quais são os cardápios dos próximos dias no site.
+- **História 10:** Como usuário, gostaria de ver qual é o cardápio do dia de cada restaurante.
 
 
 ## Backlog da sprint
 
-- **História 2:** Como usuário, gostaria de ter acesso a um extrato da conta, dividido mensalmente, contendo todos os depósitos e gastos.
+- **História 2:** Como usuário, gostaria de ter acesso a um extrato da conta, contendo todos os depósitos e gastos.
   - Tarefa e responsáveis:
     - Instalar banco de dados, modelar como será o banco de dados relacional e criar primeiras tabelas [Raphael]
     - Instalar dependências a serem utilizadas do Python [Antônio]
@@ -58,7 +58,7 @@ O sistema de pagamento automático para restaurantes universitários será desen
     - Conectar o sistema de leitura NFC com o backend da aplicação [Raphael]
     - Em um sistema de WebSocket de status de uso da catraca com o backend, criar uma página de visualização do status da catraca e do usuário que a utilizou no momento [Antônio] 
 
-- **História 10:** Como usuário, gostaria de ver qual é o cardápio do dia de cada restaurante e quais são os cardápios dos próximos dias no site.
+- **História 10:** Como usuário, gostaria de ver qual é o cardápio do dia de cada restaurante.
   - Tarefa e responsáveis:
     - Criar a tabela de cadastro do cardápio de cada dia de cada restaurante [Raphael]
     - Implementar no backend a lógica de retornar o cardápio do dia [Antônio]
