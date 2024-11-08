@@ -19,17 +19,61 @@ def isnull(target):
         return True
     return False
 
-lunch ="""Salada de Alface Crespa
-Salada Tabule
-Feijão Carioca
-Isca de Frango Colorida
-Bife de milho
-Macarrão parafuso com brócolis
+lunchs = ["""Salada de Acelga com Repolho Roxo
+Salada de Tomate
 Arroz Branco
+Feijão Carioca
+Carne de porco frita
+Quibe assado de cenoura
+Purê de Batata
 Molho de Hortelã
-Sobremesa Laranja
+Doce de Paçoca
+Copo Refresco
+""",
+"""Salada de Acelga com Repolho
+Salada de Tomate
+Arroz Branco
+Feijão Carioca
+Carne de porco frita
+Quibe de Cenoura
+Purê de Batata
+Molho de Hortelã
+Doce de Banana em Tablete
+Copo Refresco
+""",
+"""Salada de Acelga com Repolho
+Salada de Legumes
+Arroz Branco
+Tutu à Mineira
+Lagarto ao Molho Madeira
+Hambúrguer de grão-de-bico
+Repolho oriental
+Doce de leite
+Copo Refresco
+""",
+"""Salada de Acelga com Repolho
+Salada de Legumes
+Arroz Branco
+Tutu à Mineira
+Lagarto ao Molho Madeira
+Hambúrguer de grão-de-bico
+Repolho oriental
+Sobremesa Doce de leite
+Copo Refresco
+""",
+"""Salada de Acelga
+Salada de Batata Doce
+Prato Principal
+Arroz Branco
+Arroz Integral
+Feijão Carioca
+Almôndega de Frango
+Almôndegas de Soja
+Macarrão ao Alho e Óleo
+Sobremesa Melancia
 Copo Refresco
 """
+]
 
 class Database():
     def __init__(self, database_filename):
@@ -62,10 +106,10 @@ class Database():
         self.insertRestaurant(restaurant_id=4, restaurant_name="Campus Direito")
         self.insertRestaurant(restaurant_id=5, restaurant_name="Campus ICA")
 
-        for date in ["2024-11-03", "2024-11-04", "2024-11-05", "2024-11-06", "2024-11-07", "2024-11-08", "2024-11-09"]:
+        for date in ["2024-11-07", "2024-11-08", "2024-11-09"]:
             for j, restaurant_name in enumerate(["Pampulha 1", "Pampulha 2", "Campus Saúde", "Campus Direito", "Campus ICA"]):
-                self.insertMenu(lunch, date, "Almoco", restaurant_name, j+1)
-                self.insertMenu(lunch, date, "Janta", restaurant_name, j+1)
+                self.insertMenu(lunchs[j], date, "Almoco", restaurant_name, j+1)
+                self.insertMenu(lunchs[j], date, "Janta", restaurant_name, j+1)
 
         self.insertNewCard(card_id="7CA288BD", username="antonio.caetano")
         self.insertNewCard(card_id="64090D64", username="raphael.mendes")
